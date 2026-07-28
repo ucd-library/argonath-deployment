@@ -1,0 +1,109 @@
+{
+  "project" : "argonath",
+
+  "environments" : {
+    "prod" : {
+      "project" : "argonath",
+      "platform" : "libk8s",
+      "namespace" : "argonath-prod",
+      "kubeconfig" : {
+        "secret" : "libk8s-argonath-prod-deployer",
+        "context" : "argonath-prod-deploy-context"
+      }
+    }
+  },
+
+  "secrets" : {
+    "prod" : [
+    {
+      "k8sName" : "postgres-password",
+      "mappings" : [{
+        "gcsmName" : "libk8s-argonath-prod-pg-password",
+        "k8sProperty" : "POSTGRES_PASSWORD"
+      }]
+    },
+    {
+      "k8sName" : "dagster-postgres-password",
+      "mappings" : [{
+        "gcsmName" : "libk8s-argonath-prod-dagster-pg-password",
+        "k8sProperty" : "DAGSTER_POSTGRES_PASSWORD"
+      }]
+    },
+    {
+      "k8sName" : "superset-secret-key",
+      "mappings" : [{
+        "gcsmName" : "libk8s-argonath-prod-superset-key",
+        "k8sProperty" : "SUPERSET_SECRET_KEY"
+      }]
+    },
+    {
+      "k8sName" : "oidc-client-secret",
+      "mappings" : [{
+        "gcsmName" : "libk8s-argonath-prod-oidc-client-secret",
+        "k8sProperty" : "OIDC_CLIENT_SECRET"
+      }]
+    },
+    {
+      "k8sName" : "jwt-secret",
+      "mappings" : [{
+        "gcsmName" : "libk8s-argonath-prod-jwt-secret",
+        "k8sProperty" : "JWT_SECRET"
+      }]
+    },
+    {
+      "k8sName" : "samwise-api-key",
+      "mappings" : [{
+        "gcsmName" : "libk8s-argonath-prod-samwise-api-key",
+        "k8sProperty" : "SAMWISE_API_KEY"
+      }]
+    },
+    {
+      "k8sName" : "argonath-wildcard-tls",
+      "tls" : true,
+      "certGcsmName" : "tls-wildcard-cert",
+      "keyGcsmName" : "tls-wildcard-key"
+    }]
+  },
+
+  "services" : [
+    {
+      "path" : "kustomize/app-env"
+    },
+    {
+      "path" : "kustomize/volumes/caskfs-volume",
+      "group" : "anduin"
+    },
+    {
+      "path" : "kustomize/volumes/dagster-storage-volume",
+      "group" : "anduin"
+    },
+    {
+      "path" : "kustomize/postgres",
+      "group" : "anduin"
+    },
+    {
+      "path" : "kustomize/dagster-postgres",
+      "group" : "anduin"
+    },
+    {
+      "path" : "kustomize/dagster/dagster-ui",
+      "group" : "anduin"
+    },
+    {
+      "path" : "kustomize/dagster/dagster-daemon",
+      "group" : "anduin"
+    },
+    {
+      "path" : "kustomize/cask",
+      "group" : "anduin"
+    },
+    {
+      "path" : "kustomize/anduin-gateway",
+      "group" : "anduin"
+    },
+    {
+      "path" : "kustomize/superset",
+      "group" : "anduin"
+    }
+  ]
+}

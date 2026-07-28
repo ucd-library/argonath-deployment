@@ -1,0 +1,35 @@
+# NOTE: image is a placeholder — argonath has no dedicated build yet. No
+# argonath-specific dashboard/customization exists today either (no
+# DASHBOARD_FILE=gs://... env, unlike aggie-experts's Superset), so this can
+# likely just track project-anduin's upstream superset image directly.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: superset
+spec:
+  template:
+    spec:
+      containers:
+        - name: service
+          image: us-west1-docker.pkg.dev/argonath/pub/argonath-superset:prod
+      nodeSelector:
+        intended-for: argonath-prod-backend
+  volumeClaimTemplates:
+    - metadata:
+        name: superset-home
+      spec:
+        storageClassName: local-hostpath
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+    - metadata:
+        name: superset-init
+      spec:
+        storageClassName: local-hostpath
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi

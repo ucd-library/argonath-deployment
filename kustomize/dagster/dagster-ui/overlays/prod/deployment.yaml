@@ -1,0 +1,17 @@
+# NOTE: image is a placeholder — argonath has no dedicated build yet. This
+# will eventually need to be a custom image bundling the upstream dagster
+# image with argonath's dagster/ code (defs.py, workspace.yaml, lib/) and the
+# `dc` CLI (from media/), the same way aggie-experts's "harvest" image bundles
+# app code + cask CLI on top of project-anduin's dagster image.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dagster-ui
+spec:
+  template:
+    spec:
+      containers:
+        - name: service
+          image: us-west1-docker.pkg.dev/argonath/pub/argonath-dagster:prod
+      nodeSelector:
+        intended-for: argonath-prod-backend

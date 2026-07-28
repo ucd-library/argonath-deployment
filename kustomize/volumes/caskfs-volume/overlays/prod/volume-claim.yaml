@@ -1,0 +1,14 @@
+# NOTE: storageClassName is a placeholder — swap in whatever NFS-backed
+# StorageClass exists on libk8s (e.g. an nfs-subdir-external-provisioner
+# class) before applying.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: caskfs
+spec:
+  storageClassName: nfs-client
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 200Gi

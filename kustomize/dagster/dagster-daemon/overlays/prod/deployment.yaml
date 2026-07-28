@@ -1,0 +1,13 @@
+# NOTE: same placeholder image as dagster-ui — see that overlay's comment.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dagster-daemon
+spec:
+  template:
+    spec:
+      containers:
+        - name: service
+          image: us-west1-docker.pkg.dev/argonath/pub/argonath-dagster:prod
+      nodeSelector:
+        intended-for: argonath-prod-backend

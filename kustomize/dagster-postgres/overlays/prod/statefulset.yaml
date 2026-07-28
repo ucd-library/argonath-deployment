@@ -1,0 +1,26 @@
+# NOTE: storageClassName is a placeholder for a hostPath-backed StorageClass
+# on libk8s (host-mounted storage, per request) — confirm the actual class
+# name before applying. Consider pinning this to fast local disk given the
+# write load dagster puts on it during runs.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dagster-postgres
+spec:
+  template:
+    spec:
+      containers:
+        - name: database
+          image: us-west1-docker.pkg.dev/argonath/pub/anduin-pg:prod
+      nodeSelector:
+        intended-for: argonath-prod-backend
+  volumeClaimTemplates:
+    - metadata:
+        name: data-volume
+      spec:
+        storageClassName: local-hostpath
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 50Gi

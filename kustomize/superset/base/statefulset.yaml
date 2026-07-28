@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: superset
+spec:
+  selector:
+    matchLabels:
+      app: superset
+  replicas: 1
+  serviceName: superset
+  template:
+    metadata:
+      labels:
+        app: superset
+    spec:
+      containers:
+      - name: service
+        image: us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/superset:main
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "200Mi"
+            cpu: "200m"
+        env:
+        # hack to override default superset port that k8s injects as tcp://*.*.*.*:8088
+        - name: SUPERSET_PORT
+          value: "8088"
+        envFrom:
+          - configMapRef:
+              name: app-config
+          - secretRef:
+              name: postgres-password
+          - secretRef:
+              name: superset-secret-key
+        volumeMounts:
+        - name: superset-home
+          mountPath: /app/superset_home
+        - name: superset-init
+          mountPath: /etc/superset/init
+  volumeClaimTemplates:
+  - metadata:
+      name: superset-home
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 5Gi
+  - metadata:
+      name: superset-init
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 5Gi

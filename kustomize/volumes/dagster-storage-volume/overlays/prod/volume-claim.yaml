@@ -1,0 +1,13 @@
+# NOTE: same NFS-backed StorageClass as caskfs — dagster-ui and dagster-daemon
+# both mount this, so it needs ReadWriteMany. Confirm the actual class name.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dagster-storage
+spec:
+  storageClassName: nfs-client
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 50Gi

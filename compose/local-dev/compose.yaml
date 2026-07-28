@@ -1,0 +1,166 @@
+services:
+
+  # --- shared postgres (cask, anduin-gateway, superset) ---
+  postgres:
+    image: ${IMAGE_PROJECT_ANDUIN_ANDUIN_PG}
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  # --- dedicated postgres for dagster (heavy read/write during pipeline runs) ---
+  dagster-postgres:
+    image: ${IMAGE_PROJECT_ANDUIN_ANDUIN_PG}
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - dagster_pg_data:/var/lib/postgresql/data
+
+  dagster-ui:
+    image: ${IMAGE_ARGONATH_DAGSTER}
+    env_file:
+      - .env
+    environment:
+      - DAGSTER_POSTGRES_HOST=dagster-postgres
+      - DAGSTER_POSTGRES_DB=${DAGSTER_POSTGRES_DB:-dagster}
+      - DAGSTER_POSTGRES_USER=postgres
+      - DAGSTER_POSTGRES_PASSWORD=postgres
+      - SAMWISE_API_KEY=${SAMWISE_API_KEY}
+      - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
+    volumes:
+      - ../../../argonath/dagster:/dagster
+    depends_on:
+      dagster-postgres:
+        condition: service_healthy
+    command: ["dagster-webserver", "-h", "0.0.0.0", "-p", "3002", "-w", "/dagster/workspace.yaml"]
+    ports:
+      - "3002:3002"
+
+  dagster-daemon:
+    image: ${IMAGE_ARGONATH_DAGSTER}
+    env_file:
+      - .env
+    environment:
+      - DAGSTER_POSTGRES_HOST=dagster-postgres
+      - DAGSTER_POSTGRES_DB=${DAGSTER_POSTGRES_DB:-dagster}
+      - DAGSTER_POSTGRES_USER=postgres
+      - DAGSTER_POSTGRES_PASSWORD=postgres
+      - SAMWISE_API_KEY=${SAMWISE_API_KEY}
+      - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
+    volumes:
+      - ../../../argonath/dagster:/dagster
+    depends_on:
+      dagster-postgres:
+        condition: service_healthy
+    command: ["dagster-daemon", "run", "-w", "/dagster/workspace.yaml"]
+
+  cask:
+    image: ${IMAGE_ARGONATH_CASK}
+    env_file:
+      - .env
+    environment:
+      - CASKFS_PG_HOST=postgres
+      - CASKFS_ENABLE_POWERWASH=true
+      - CASKFS_ROOT_DIR=/opt/cache
+      - CASKFS_ACL_ENABLED=false
+      - CASKFS_WEBAPP_PORT=3001
+      - CASKFS_WEBAPP_PATH_PREFIX=/cask
+    volumes:
+      - caskfs_data:/opt/cache
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "3001:3001"
+
+  superset:
+    image: ${IMAGE_ARGONATH_SUPERSET}
+    env_file:
+      - .env
+    environment:
+      - PGHOST=postgres
+      - PGUSER=postgres
+      - PGPASSWORD=postgres
+      - PGDATABASE=postgres
+      - SUPERSET_APP_ROOT=/superset
+    volumes:
+      - superset_home:/app/superset_home
+      - superset_init:/etc/superset/init
+      - ../../../../project-anduin/superset/superset_config.py:/app/superset_config.py
+      - ../../../../project-anduin/superset/custom_security_manager.py:/app/custom_security_manager.py
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8088:8088"
+    # superset needs a one-time `superset db upgrade` / admin-create step run
+    # manually before it'll serve — see docs/local-dev.md
+    command: ["bash", "-c", "tail -f /dev/null"]
+
+  anduin-gateway:
+    image: ${IMAGE_ARGONATH_GATEWAY}
+    env_file:
+      - .env
+    environment:
+      - PORT=4000
+      - APP_NAME=Argonath
+      - POSTGRES_PASSWORD=postgres
+      - CASK_URL=http://cask:3001
+      - DAGSTER_URL=http://dagster-ui:3002
+      - ANDUIN_APP_URL=http://localhost:4000
+    volumes:
+      - ../../../../project-anduin/auth-gateway/controllers:/app/controllers
+      - ../../../../project-anduin/auth-gateway/lib:/app/lib
+      - ../../../../project-anduin/auth-gateway/client:/app/client
+      - ../../../../project-anduin/auth-gateway/index.js:/app/index.js
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "4000:4000"
+
+  dc:
+    build:
+      context: ../../../argonath/media
+      dockerfile: Dockerfile
+    image: ${IMAGE_ARGONATH_DC:-argonath-dc:dev}
+    env_file:
+      - .env
+    environment:
+      - SAMWISE_API_KEY=${SAMWISE_API_KEY}
+      - SAMWISE_API_URL=${SAMWISE_API_URL:-http://samwise.library.ucdavis.edu/api}
+      - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
+      - DAGSTER_POSTGRES_HOST=dagster-postgres
+      - DAGSTER_POSTGRES_DB=${DAGSTER_POSTGRES_DB:-dagster}
+      - DAGSTER_POSTGRES_USER=postgres
+    volumes:
+      - ../../../argonath/media/dc:/app/dc
+    command: ["bash", "-c", "tail -f /dev/null"]
+
+volumes:
+  pg_data:
+    driver: local
+  dagster_pg_data:
+    driver: local
+  caskfs_data:
+    driver: local
+  superset_home:
+    driver: local
+  superset_init:
+    driver: local

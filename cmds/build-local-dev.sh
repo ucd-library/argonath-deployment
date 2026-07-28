@@ -1,0 +1,30 @@
+
+#! /bin/bash
+VERSION=$1
+if [[ -z "$VERSION" ]]; then
+  VERSION="main"
+fi
+
+ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd $ROOT_DIR/..
+
+ENV_FILE=./compose/local-dev/.env
+
+# cork-kube build exec \
+#   -p project-anduin \
+#   -v main \
+#   -o sandbox \
+#   --depth ALL \
+#   --set-env $ENV_FILE
+
+# cork-kube build exec \
+#   -p caskfs \
+#   -v main \
+#   -o sandbox \
+#   --depth ALL
+
+cork-kube build exec \
+  -p argonath \
+  -v $VERSION \
+  --set-env $ENV_FILE \
+  -o sandbox
