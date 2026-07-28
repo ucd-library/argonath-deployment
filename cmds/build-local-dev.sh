@@ -17,14 +17,15 @@ ENV_FILE=./compose/local-dev/.env
 #   --depth ALL \
 #   --set-env $ENV_FILE
 
-# cork-kube build exec \
-#   -p caskfs \
-#   -v main \
-#   -o sandbox \
-#   --depth ALL
-
 cork-kube build exec \
-  -p argonath \
-  -v $VERSION \
+  -p caskfs \
+  -v main \
+  -o sandbox \
   --set-env $ENV_FILE \
-  -o sandbox
+  --depth ALL
+
+# cork-kube build exec \
+#   -p argonath \
+#   -v $VERSION \
+#   --set-env $ENV_FILE \
+#   -o sandbox

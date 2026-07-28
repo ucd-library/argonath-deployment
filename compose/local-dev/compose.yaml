@@ -2,7 +2,7 @@ services:
 
   # --- shared postgres (cask, anduin-gateway, superset) ---
   postgres:
-    image: ${IMAGE_PROJECT_ANDUIN_ANDUIN_PG}
+    image: ${IMAGE_POSTGRES_POSTGRES}
     env_file:
       - .env
     environment:
@@ -16,28 +16,12 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
 
-  # --- dedicated postgres for dagster (heavy read/write during pipeline runs) ---
-  dagster-postgres:
-    image: ${IMAGE_PROJECT_ANDUIN_ANDUIN_PG}
-    env_file:
-      - .env
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    volumes:
-      - dagster_pg_data:/var/lib/postgresql/data
-
   dagster-ui:
-    image: ${IMAGE_ARGONATH_DAGSTER}
+    image: ${IMAGE_ARGONATH_ARGONAUTH_WORKER}
     env_file:
       - .env
     environment:
-      - DAGSTER_POSTGRES_HOST=dagster-postgres
+      - DAGSTER_POSTGRES_HOST=postgres
       - DAGSTER_POSTGRES_DB=${DAGSTER_POSTGRES_DB:-dagster}
       - DAGSTER_POSTGRES_USER=postgres
       - DAGSTER_POSTGRES_PASSWORD=postgres
@@ -46,14 +30,14 @@ services:
     volumes:
       - ../../../argonath/dagster:/dagster
     depends_on:
-      dagster-postgres:
+      postgres:
         condition: service_healthy
     command: ["dagster-webserver", "-h", "0.0.0.0", "-p", "3002", "-w", "/dagster/workspace.yaml"]
     ports:
       - "3002:3002"
 
   dagster-daemon:
-    image: ${IMAGE_ARGONATH_DAGSTER}
+    image: ${IMAGE_ARGONATH_ARGONAUTH_WORKER}
     env_file:
       - .env
     environment:
@@ -66,12 +50,30 @@ services:
     volumes:
       - ../../../argonath/dagster:/dagster
     depends_on:
-      dagster-postgres:
+      postgres:
         condition: service_healthy
     command: ["dagster-daemon", "run", "-w", "/dagster/workspace.yaml"]
 
+  dagster-celery-worker:
+    image: ${IMAGE_ARGONATH_ARGONAUTH_WORKER}
+    env_file:
+      - .env
+    environment:
+      - DAGSTER_POSTGRES_HOST=dagster-postgres
+      - DAGSTER_POSTGRES_DB=${DAGSTER_POSTGRES_DB:-dagster}
+      - DAGSTER_POSTGRES_USER=postgres
+      - DAGSTER_POSTGRES_PASSWORD=postgres
+      - SAMWISE_API_KEY=${SAMWISE_API_KEY}
+      - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
+    volumes:
+      - ../../../argonath/dagster:/dagster
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["dagster-celery-worker", "-w", "/dagster/workspace.yaml"]
+
   cask:
-    image: ${IMAGE_ARGONATH_CASK}
+    image: ${IMAGE_CASKFS_CASKFS}
     env_file:
       - .env
     environment:
@@ -90,7 +92,7 @@ services:
       - "3001:3001"
 
   superset:
-    image: ${IMAGE_ARGONATH_SUPERSET}
+    image: ${IMAGE_PROJECT_ANDUIN_SUPERSET}
     env_file:
       - .env
     environment:
@@ -114,7 +116,7 @@ services:
     command: ["bash", "-c", "tail -f /dev/null"]
 
   anduin-gateway:
-    image: ${IMAGE_ARGONATH_GATEWAY}
+    image: ${IMAGE_PROJECT_ANDUIN_AUTH_GATEWAY}
     env_file:
       - .env
     environment:
@@ -135,23 +137,13 @@ services:
     ports:
       - "4000:4000"
 
-  dc:
-    build:
-      context: ../../../argonath/media
-      dockerfile: Dockerfile
-    image: ${IMAGE_ARGONATH_DC:-argonath-dc:dev}
-    env_file:
-      - .env
-    environment:
-      - SAMWISE_API_KEY=${SAMWISE_API_KEY}
-      - SAMWISE_API_URL=${SAMWISE_API_URL:-http://samwise.library.ucdavis.edu/api}
-      - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
-      - DAGSTER_POSTGRES_HOST=dagster-postgres
-      - DAGSTER_POSTGRES_DB=${DAGSTER_POSTGRES_DB:-dagster}
-      - DAGSTER_POSTGRES_USER=postgres
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672" 
     volumes:
-      - ../../../argonath/media/dc:/app/dc
-    command: ["bash", "-c", "tail -f /dev/null"]
+      - rabbitmq_data:/var/lib/rabbitmq
 
 volumes:
   pg_data:
@@ -163,4 +155,6 @@ volumes:
   superset_home:
     driver: local
   superset_init:
+    driver: local
+  rabbitmq_data:
     driver: local
