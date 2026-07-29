@@ -28,11 +28,15 @@ services:
       - SAMWISE_API_KEY=${SAMWISE_API_KEY}
       - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
     volumes:
-      - ../../../argonath/dagster:/dagster
+      - ../../../argonath/dagster/lib:/opt/argonath/dagster/lib
+      - ../../../argonath/dagster/celery_config.yaml:/opt/argonath/dagster/celery_config.yaml
+      - ../../../argonath/dagster/workspace.yaml:/opt/argonath/dagster/workspace.yaml
+      - ../../../argonath/dagster/dagster.yaml:/opt/argonath/dagster/dagster.yaml
+      - ../../../argonath/dagster/defs.py:/opt/argonath/dagster/defs.py
     depends_on:
       postgres:
         condition: service_healthy
-    command: ["dagster-webserver", "--path-prefix", "/dagster", "-h", "0.0.0.0", "-p", "3000", "-w", "/dagster/workspace.yaml"]
+    command: ["dagster-webserver", "--path-prefix", "/dagster", "-h", "0.0.0.0", "-p", "3000", "-w", "/opt/argonath/dagster/workspace.yaml"]
     ports:
       - "3000:3000"
 
@@ -48,11 +52,15 @@ services:
       - SAMWISE_API_KEY=${SAMWISE_API_KEY}
       - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
     volumes:
-      - ../../../argonath/dagster:/dagster
+      - ../../../argonath/dagster/lib:/opt/argonath/dagster/lib
+      - ../../../argonath/dagster/celery_config.yaml:/opt/argonath/dagster/celery_config.yaml
+      - ../../../argonath/dagster/workspace.yaml:/opt/argonath/dagster/workspace.yaml
+      - ../../../argonath/dagster/dagster.yaml:/opt/argonath/dagster/dagster.yaml
+      - ../../../argonath/dagster/defs.py:/opt/argonath/dagster/defs.py
     depends_on:
       postgres:
         condition: service_healthy
-    command: ["dagster-daemon", "run", "-w", "/dagster/workspace.yaml"]
+    command: ["dagster-daemon", "run", "-w", "/opt/argonath/dagster/workspace.yaml"]
 
   dagster-celery-worker:
     image: ${IMAGE_ARGONATH_ARGONAUTH_WORKER}
@@ -66,11 +74,20 @@ services:
       - SAMWISE_API_KEY=${SAMWISE_API_KEY}
       - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
     volumes:
-      - ../../../argonath/dagster:/dagster
+      # dagster code
+      - ../../../argonath/dagster/lib:/opt/argonath/dagster/lib
+      - ../../../argonath/dagster/celery_config.yaml:/opt/argonath/dagster/celery_config.yaml
+      - ../../../argonath/dagster/workspace.yaml:/opt/argonath/dagster/workspace.yaml
+      - ../../../argonath/dagster/dagster.yaml:/opt/argonath/dagster/dagster.yaml
+      - ../../../argonath/dagster/defs.py:/opt/argonath/dagster/defs.py
+      # cli code
+      - ../../../argonath/exec/dc:/opt/argonath/exec/dc
     depends_on:
+      rabbitmq:
+        condition: service_started
       postgres:
         condition: service_healthy
-    command: ["dagster-celery-worker", "-w", "/dagster/workspace.yaml"]
+    command: ["dagster-celery", "worker", "start", "-A", "dagster_celery.app", "-y", "/opt/argonath/dagster/celery_config.yaml"]
 
   cask:
     image: ${IMAGE_CASKFS_CASKFS}
@@ -104,8 +121,6 @@ services:
     volumes:
       - superset_home:/app/superset_home
       - superset_init:/etc/superset/init
-      - ../../../../project-anduin/superset/superset_config.py:/app/superset_config.py
-      - ../../../../project-anduin/superset/custom_security_manager.py:/app/custom_security_manager.py
     depends_on:
       postgres:
         condition: service_healthy
@@ -123,11 +138,6 @@ services:
       - CASK_URL=http://cask:3001
       - DAGSTER_URL=http://dagster-ui:3000
       - ANDUIN_APP_URL=http://localhost:4000
-    volumes:
-      - ../../../../project-anduin/auth-gateway/controllers:/app/controllers
-      - ../../../../project-anduin/auth-gateway/lib:/app/lib
-      - ../../../../project-anduin/auth-gateway/client:/app/client
-      - ../../../../project-anduin/auth-gateway/index.js:/app/index.js
     depends_on:
       postgres:
         condition: service_healthy
