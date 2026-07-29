@@ -32,16 +32,16 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command: ["dagster-webserver", "-h", "0.0.0.0", "-p", "3002", "-w", "/dagster/workspace.yaml"]
+    command: ["dagster-webserver", "--path-prefix", "/dagster", "-h", "0.0.0.0", "-p", "3000", "-w", "/dagster/workspace.yaml"]
     ports:
-      - "3002:3002"
+      - "3000:3000"
 
   dagster-daemon:
     image: ${IMAGE_ARGONATH_ARGONAUTH_WORKER}
     env_file:
       - .env
     environment:
-      - DAGSTER_POSTGRES_HOST=dagster-postgres
+      - DAGSTER_POSTGRES_HOST=postgres
       - DAGSTER_POSTGRES_DB=${DAGSTER_POSTGRES_DB:-dagster}
       - DAGSTER_POSTGRES_USER=postgres
       - DAGSTER_POSTGRES_PASSWORD=postgres
@@ -59,7 +59,7 @@ services:
     env_file:
       - .env
     environment:
-      - DAGSTER_POSTGRES_HOST=dagster-postgres
+      - DAGSTER_POSTGRES_HOST=postgres
       - DAGSTER_POSTGRES_DB=${DAGSTER_POSTGRES_DB:-dagster}
       - DAGSTER_POSTGRES_USER=postgres
       - DAGSTER_POSTGRES_PASSWORD=postgres
@@ -111,9 +111,6 @@ services:
         condition: service_healthy
     ports:
       - "8088:8088"
-    # superset needs a one-time `superset db upgrade` / admin-create step run
-    # manually before it'll serve — see docs/local-dev.md
-    command: ["bash", "-c", "tail -f /dev/null"]
 
   anduin-gateway:
     image: ${IMAGE_PROJECT_ANDUIN_AUTH_GATEWAY}
@@ -124,7 +121,7 @@ services:
       - APP_NAME=Argonath
       - POSTGRES_PASSWORD=postgres
       - CASK_URL=http://cask:3001
-      - DAGSTER_URL=http://dagster-ui:3002
+      - DAGSTER_URL=http://dagster-ui:3000
       - ANDUIN_APP_URL=http://localhost:4000
     volumes:
       - ../../../../project-anduin/auth-gateway/controllers:/app/controllers

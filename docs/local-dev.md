@@ -28,7 +28,7 @@ Creates `compose/local-dev/.env` from `.env.example` and generates a
 | Service        | URL                     |
 |----------------|--------------------------|
 | Auth Gateway   | http://localhost:4000    |
-| Dagster UI     | http://localhost:3002    |
+| Dagster UI     | http://localhost:3000    |
 | Cask           | http://localhost:3001    |
 | Superset       | http://localhost:8088    |
 
