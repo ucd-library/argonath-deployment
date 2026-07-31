@@ -25,28 +25,11 @@ still run ad hoc via compose for local dev.
 - `docs/` — [prerequisites](docs/prerequisites.md),
   [local dev](docs/local-dev.md), [prod cluster](docs/prod-cluster.md)
 
-See [docs/local-dev.md](docs/local-dev.md) to get a stack running locally, or
-[docs/prod-cluster.md](docs/prod-cluster.md) for the libk8s deploy checklist.
+## Docs
 
-## Notable deviations from convention
-
-This is modeled on
-[aggie-experts-deployment](https://github.com/ucd-library/aggie-experts-deployment),
-with a few differences worth knowing:
-
-- **Prod is libk8s, not a compose VM** — aggie-experts's anduin-platform prod
-  runs via docker-compose on a VM, with libk8s used only for a dev
-  environment. Argonath's prod runs directly on libk8s, so there's a `prod`
-  kustomize overlay instead of `dev`.
-- **Two postgres instances** — `postgres` (cask, auth gateway, superset) and
-  a dedicated `dagster-postgres`, since dagster's run/event-log storage takes
-  a heavy read/write hit during pipeline execution. aggie-experts shares one
-  instance across everything.
-- **No Celery** — argonath's `dagster.yaml` uses `DefaultRunLauncher` +
-  `QueuedRunCoordinator`, so there's no `dagster-celery-worker` or `rabbitmq`
-  here, unlike aggie-experts.
-- **No `.cork-build` yet** — argonath doesn't have a custom bundled image the
-  way aggie-experts's `harvest` image bundles app code + cask CLI on top of
-  project-anduin's dagster image. The `IMAGE_ARGONATH_*` vars throughout this
-  repo are placeholders anticipating that build; see
-  [docs/prod-cluster.md](docs/prod-cluster.md).
+- [docs/prerequisites.md](docs/prerequisites.md) — what you need installed
+  and how repos should be checked out before doing anything else
+- [docs/local-dev.md](docs/local-dev.md) — first-time setup and day-to-day
+  workflow for running the stack locally with docker compose
+- [docs/prod-cluster.md](docs/prod-cluster.md) — first-deploy checklist for
+  the libk8s prod environment
