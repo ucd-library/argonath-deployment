@@ -138,3 +138,8 @@ data, superset home, rabbitmq data) — and start from scratch:
 
 You'll need to re-run the Superset one-time init and `cask init-pg` (either
 by hand, or by re-running `./cmds/init.sh`) after this.
+
+Note: `compose/local-dev/initdb/*.sql` (which creates the `dagster` and
+`superset` databases, and the `auth_gateway` schema in the default `postgres`
+database) only runs against a fresh, empty `pg_data` volume, so it only takes
+effect after a hard reset like this — not on a plain `down.sh`/`up.sh`.
