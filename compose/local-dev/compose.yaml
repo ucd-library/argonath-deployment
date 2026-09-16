@@ -26,14 +26,21 @@ services:
       - DAGSTER_POSTGRES_DB=${DAGSTER_POSTGRES_DB:-dagster}
       - DAGSTER_POSTGRES_USER=postgres
       - DAGSTER_POSTGRES_PASSWORD=postgres
+      - DIGTK_POSTGRES_HOST=postgres
+      - DIGTK_POSTGRES_DB=postgres
+      - DIGTK_POSTGRES_USER=postgres
+      - DIGTK_POSTGRES_PASSWORD=postgres
       - SAMWISE_API_KEY=${SAMWISE_API_KEY}
       - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
     volumes:
+      - dagster_storage:/opt/dagster/dagster_home/storage
       - ../../../argonath/dagster/lib:/opt/argonath/dagster/lib
       - ../../../argonath/dagster/celery_config.yaml:/opt/argonath/dagster/celery_config.yaml
       - ../../../argonath/dagster/workspace.yaml:/opt/argonath/dagster/workspace.yaml
       - ../../../argonath/dagster/dagster.yaml:/opt/argonath/dagster/dagster.yaml
       - ../../../argonath/dagster/defs.py:/opt/argonath/dagster/defs.py
+      # cli code
+      - ../../../argonath/exec/digtk:/opt/argonath/exec/digtk 
     depends_on:
       postgres:
         condition: service_healthy
@@ -50,17 +57,29 @@ services:
       - DAGSTER_POSTGRES_DB=${DAGSTER_POSTGRES_DB:-dagster}
       - DAGSTER_POSTGRES_USER=postgres
       - DAGSTER_POSTGRES_PASSWORD=postgres
+      - DIGTK_POSTGRES_HOST=postgres
+      - DIGTK_POSTGRES_DB=postgres
+      - DIGTK_POSTGRES_USER=postgres
+      - DIGTK_POSTGRES_PASSWORD=postgres
       - SAMWISE_API_KEY=${SAMWISE_API_KEY}
       - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
+      - DAMS_ES_HOST=http://elasticsearch:9200
+      - DAMS_ES_INDEX=${DAMS_ES_INDEX:-item-write}
     volumes:
+      - dagster_storage:/opt/dagster/dagster_home/storage
       - ../../../argonath/dagster/lib:/opt/argonath/dagster/lib
       - ../../../argonath/dagster/celery_config.yaml:/opt/argonath/dagster/celery_config.yaml
       - ../../../argonath/dagster/workspace.yaml:/opt/argonath/dagster/workspace.yaml
       - ../../../argonath/dagster/dagster.yaml:/opt/argonath/dagster/dagster.yaml
       - ../../../argonath/dagster/defs.py:/opt/argonath/dagster/defs.py
+      # cli code
+      - ../../../argonath/exec/digtk:/opt/argonath/exec/digtk
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - default
+      - argonath-shared
     command: ["dagster-daemon", "run", "-w", "/opt/argonath/dagster/workspace.yaml"]
 
   dagster-celery-worker:
@@ -72,9 +91,16 @@ services:
       - DAGSTER_POSTGRES_DB=${DAGSTER_POSTGRES_DB:-dagster}
       - DAGSTER_POSTGRES_USER=postgres
       - DAGSTER_POSTGRES_PASSWORD=postgres
+      - DIGTK_POSTGRES_HOST=postgres
+      - DIGTK_POSTGRES_DB=postgres
+      - DIGTK_POSTGRES_USER=postgres
+      - DIGTK_POSTGRES_PASSWORD=postgres
       - SAMWISE_API_KEY=${SAMWISE_API_KEY}
       - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
+      - DAMS_ES_HOST=http://elasticsearch:9200
+      - DAMS_ES_INDEX=${DAMS_ES_INDEX:-item-write}
     volumes:
+      - dagster_storage:/opt/dagster/dagster_home/storage
       # dagster code
       - ../../../argonath/dagster/lib:/opt/argonath/dagster/lib
       - ../../../argonath/dagster/celery_config.yaml:/opt/argonath/dagster/celery_config.yaml
@@ -82,12 +108,15 @@ services:
       - ../../../argonath/dagster/dagster.yaml:/opt/argonath/dagster/dagster.yaml
       - ../../../argonath/dagster/defs.py:/opt/argonath/dagster/defs.py
       # cli code
-      - ../../../argonath/exec/dc:/opt/argonath/exec/dc
+      - ../../../argonath/exec/digtk:/opt/argonath/exec/digtk
     depends_on:
       rabbitmq:
         condition: service_started
       postgres:
         condition: service_healthy
+    networks:
+      - default
+      - argonath-shared
     command: ["dagster-celery", "worker", "start", "-A", "dagster_celery.app", "-y", "/opt/argonath/dagster/celery_config.yaml"]
 
   cask:
@@ -97,7 +126,7 @@ services:
     environment:
       - CASKFS_PG_HOST=postgres
       - CASKFS_ENABLE_POWERWASH=true
-      - CASKFS_ROOT_DIR=/opt/cache
+      - CASKFS_ROOT_DIR=/opt/cask
       - CASKFS_ACL_ENABLED=true
       - CASKFS_WEBAPP_ENV=dev
       - CASKFS_AUDIT_ENABLED=true
@@ -113,10 +142,13 @@ services:
       - ../../../../caskfs/src/schema:/opt/caskfs/src/schema
       - ../../../../caskfs/src/client:/opt/caskfs/src/client
       - ../../../../caskfs/src/index.js:/opt/caskfs/src/index.js
-      - caskfs_data:/opt/cache
+      - caskfs_data:/opt/cask
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - default
+      - argonath-shared
     ports:
       - "3001:3001"
 
@@ -164,10 +196,16 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
+networks:
+  argonath-shared:
+    name: argonath-shared
+
 volumes:
   pg_data:
     driver: local
   dagster_pg_data:
+    driver: local
+  dagster_storage:
     driver: local
   caskfs_data:
     driver: local

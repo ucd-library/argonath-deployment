@@ -10,11 +10,13 @@ echo "Setting up local development environment for user: $USERNAME"
 # ./build-local-dev.sh --all
 
 # Start the local development environment
-./up.sh
+# ./up.sh
 
 # install the pg cask tables and add yourself as an admin user
 ./argonath-dc.sh exec cask cask init-pg
 ./argonath-dc.sh exec cask cask -i admin  acl user-role-set $USERNAME admin
+./argonath-dc.sh exec cask cask -i admin  acl user-role-set dagster admin
+./argonath-dc.sh exec cask cask -i admin  acl user-role-set dcs-gateway admin
 
 cask env set -t http -h  http://localhost:4000/cask -c dev argo-local-dev
 cask env default argo-local-dev
