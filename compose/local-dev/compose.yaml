@@ -30,6 +30,13 @@ services:
       - DIGTK_POSTGRES_DB=postgres
       - DIGTK_POSTGRES_USER=postgres
       - DIGTK_POSTGRES_PASSWORD=postgres
+      # for now, digtk reporting db same as above, but in 'reporting' schema
+      - DIGTK_REPORTING_PG_HOST=postgres
+      - DIGTK_REPORTING_PG_DATABASE=postgres
+      - DIGTK_REPORTING_PG_USER=postgres
+      - DIGTK_REPORTING_PG_PASSWORD=postgres
+      - CASK_API_URL=${CASK_API_URL:-http://cask:3001/cask/api}
+      - CASK_TRUSTED_USER=${CASK_TRUSTED_USER:-dagster}
       - SAMWISE_API_KEY=${SAMWISE_API_KEY}
       - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
     volumes:
@@ -61,6 +68,13 @@ services:
       - DIGTK_POSTGRES_DB=postgres
       - DIGTK_POSTGRES_USER=postgres
       - DIGTK_POSTGRES_PASSWORD=postgres
+      # See dagster-ui's identical block above for why each of these is set.
+      - DIGTK_REPORTING_PG_HOST=postgres
+      - DIGTK_REPORTING_PG_DATABASE=postgres
+      - DIGTK_REPORTING_PG_USER=postgres
+      - DIGTK_REPORTING_PG_PASSWORD=postgres
+      - CASK_API_URL=${CASK_API_URL:-http://cask:3001/cask/api}
+      - CASK_TRUSTED_USER=${CASK_TRUSTED_USER:-dagster}
       - SAMWISE_API_KEY=${SAMWISE_API_KEY}
       - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
       - DAMS_ES_HOST=http://elasticsearch:9200
@@ -95,6 +109,12 @@ services:
       - DIGTK_POSTGRES_DB=postgres
       - DIGTK_POSTGRES_USER=postgres
       - DIGTK_POSTGRES_PASSWORD=postgres
+      - DIGTK_REPORTING_PG_HOST=postgres
+      - DIGTK_REPORTING_PG_DATABASE=postgres
+      - DIGTK_REPORTING_PG_USER=postgres
+      - DIGTK_REPORTING_PG_PASSWORD=postgres
+      - CASK_API_URL=${CASK_API_URL:-http://cask:3001/cask/api}
+      - CASK_TRUSTED_USER=${CASK_TRUSTED_USER:-dagster}
       - SAMWISE_API_KEY=${SAMWISE_API_KEY}
       - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
       - DAMS_ES_HOST=http://elasticsearch:9200
@@ -127,13 +147,19 @@ services:
       - CASKFS_PG_HOST=postgres
       - CASKFS_ENABLE_POWERWASH=true
       - CASKFS_ROOT_DIR=/opt/cask
-      - CASKFS_ACL_ENABLED=true
       - CASKFS_WEBAPP_ENV=dev
       - CASKFS_AUDIT_ENABLED=true
       - CASKFS_HEADER_AUTH_ENABLED=true
       - CASKFS_HEADER_AUTH_HEADER=x-anduin-user
       - CASKFS_WEBAPP_PORT=3001
       - CASKFS_WEBAPP_PATH_PREFIX=/cask
+      # - CASKFS_ACL_ENABLED=false
+      # CaskFS only RDF-indexes values matching CASKFS_FILTER_URI_MATCHES (see
+      # docs/ld.md). /cask/find?subject=...&predicate=... ANDs two separate
+      # lookups, so both the ark value and its https://schema.org/ark
+      # predicate need their own pattern here, or the query returns nothing.
+      # digtk.lib.items.resolve() (every ARK lookup) depends on this.
+      - CASKFS_FILTER_URI_MATCHES=^https://schema\.org/,^ark:/
     volumes:
       - ../../../../caskfs/src/api:/opt/caskfs/src/api
       - ../../../../caskfs/src/bin:/opt/caskfs/src/bin
