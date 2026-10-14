@@ -75,8 +75,8 @@ services:
       - CASK_API_URL=${CASK_API_URL:-http://cask:3001/cask/api}
       - CASK_TRUSTED_USER=${CASK_TRUSTED_USER:-dagster}
       - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
-      - DAMS_ES_HOST=http://elasticsearch:9200
-      - DAMS_ES_INDEX=${DAMS_ES_INDEX:-item-write}
+      - SHOWCASE_ES_HOST=http://elasticsearch:9200
+      - SHOWCASE_ES_INDEX=${SHOWCASE_ES_INDEX:-item-write}
     volumes:
       - dagster_storage:/opt/dagster/dagster_home/storage
       - ../../../argonath/dagster/lib:/opt/argonath/dagster/lib
@@ -114,8 +114,8 @@ services:
       - CASK_API_URL=${CASK_API_URL:-http://cask:3001/cask/api}
       - CASK_TRUSTED_USER=${CASK_TRUSTED_USER:-dagster}
       - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
-      - DAMS_ES_HOST=http://elasticsearch:9200
-      - DAMS_ES_INDEX=${DAMS_ES_INDEX:-item-write}
+      - SHOWCASE_ES_HOST=http://elasticsearch:9200
+      - SHOWCASE_ES_INDEX=${SHOWCASE_ES_INDEX:-item-write}
     volumes:
       - dagster_storage:/opt/dagster/dagster_home/storage
       # dagster code
@@ -212,10 +212,12 @@ services:
       - "4000:4000"
 
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:3.13-management
     ports:
       - "5672:5672"
-      - "15672:15672" 
+      - "15672:15672"
+    environment:
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit consumer_timeout 21600000
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
