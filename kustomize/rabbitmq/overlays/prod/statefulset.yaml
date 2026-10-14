@@ -1,0 +1,22 @@
+# NOTE: storageClassName is a placeholder for a hostPath-backed StorageClass
+# on libk8s (host-mounted storage, per request) — confirm the actual class
+# name before applying.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: rabbitmq
+spec:
+  template:
+    spec:
+      nodeSelector:
+        intended-for: argonath-prod-backend
+  volumeClaimTemplates:
+    - metadata:
+        name: data-volume
+      spec:
+        storageClassName: local-hostpath
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi

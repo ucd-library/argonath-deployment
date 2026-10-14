@@ -19,6 +19,17 @@ spec:
           requests:
             memory: "200Mi"
             cpu: "200m"
+        env:
+          - name: DIGTK_POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgres-password
+                key: POSTGRES_PASSWORD
+          - name: DIGTK_REPORTING_PG_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgres-password
+                key: POSTGRES_PASSWORD
         envFrom:
           - configMapRef:
               name: app-config
@@ -26,6 +37,10 @@ spec:
               name: dagster-postgres-password
           - secretRef:
               name: samwise-api-key
+          - secretRef:
+              name: preservica-username
+          - secretRef:
+              name: preservica-password
         volumeMounts:
         - name: dagster-storage-volume-claim
           mountPath: /opt/dagster/dagster_home/storage
