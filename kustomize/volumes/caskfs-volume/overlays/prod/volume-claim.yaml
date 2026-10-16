@@ -6,7 +6,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: caskfs
 spec:
-  storageClassName: nfs-client
+  storageClassName: nfs-csi
   accessModes:
     - ReadWriteMany
   resources:

@@ -5,7 +5,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: dagster-storage
 spec:
-  storageClassName: nfs-client
+  storageClassName: nfs-csi
   accessModes:
     - ReadWriteMany
   resources:

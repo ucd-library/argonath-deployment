@@ -27,6 +27,12 @@ All workloads in this repo schedule onto nodes labeled
 
 ## Updating a deployed image
 
-Once a build pipeline exists, this will look like aggie-experts-deployment's
-`cmds/update-deployment.sh` — not included yet since there's no
-cork-build-registry entry for argonath to read versions from.
+```bash
+./cmds/update-deployment.sh prod <argonath-version>
+```
+
+Resolves the `project-anduin`/`caskfs`/`postgres` versions pinned to
+`<argonath-version>` in the
+[cork-build-registry](https://github.com/ucd-library/cork-build-registry),
+patches the corresponding image tags into `kustomize/*/overlays/prod`, and
+prompts to commit and push the changes.

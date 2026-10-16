@@ -1,7 +1,3 @@
-# NOTE: image is a placeholder — argonath has no dedicated build yet.
-# Currently no argonath-specific extension to cask itself is needed, so
-# pointing this at a real argonath-tagged build (or just caskfs's own
-# upstream image directly) both work; adjust once a build pipeline exists.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -11,6 +7,6 @@ spec:
     spec:
       containers:
         - name: service
-          image: us-west1-docker.pkg.dev/argonath/pub/argonath-cask:prod
+          image: us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/argonath-cask:main
       nodeSelector:
         intended-for: argonath-prod-backend

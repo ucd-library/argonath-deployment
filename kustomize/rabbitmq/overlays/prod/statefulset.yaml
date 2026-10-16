@@ -14,7 +14,7 @@ spec:
     - metadata:
         name: data-volume
       spec:
-        storageClassName: local-hostpath
+        storageClassName: microk8s-hostpath
         accessModes:
           - ReadWriteOnce
         resources:
