@@ -7,7 +7,6 @@ spec:
     spec:
       containers:
         - name: service
-          image: >-
-            us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/argonath-gateway:main
+          image: us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/auth-gateway:0.1.4
       nodeSelector:
         intended-for: argonath-prod-backend

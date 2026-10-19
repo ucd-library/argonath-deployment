@@ -49,12 +49,12 @@ POSTGRES_VERSION=$(echo $JSON_DATA | jq -r ".builds[\"$ANDUIN_VERSION\"].postgre
 
 echo "Updating Argonath to version: $ARGONATH_VERSION (Anduin: $ANDUIN_VERSION, CaskFS: $CASKFS_VERSION, Postgres: $POSTGRES_VERSION)"
 
-edit anduin-gateway deployment "$REGISTRY/argonath-gateway:$ARGONATH_VERSION" service $ENVIRONMENT
-edit cask deployment "$REGISTRY/argonath-cask:$ARGONATH_VERSION" service $ENVIRONMENT
-edit dagster/dagster-ui deployment "$REGISTRY/argonath-dagster:$ARGONATH_VERSION" service $ENVIRONMENT
-edit dagster/dagster-daemon deployment "$REGISTRY/argonath-dagster:$ARGONATH_VERSION" service $ENVIRONMENT
-edit dagster/dagster-celery-worker deployment "$REGISTRY/argonath-dagster:$ARGONATH_VERSION" service $ENVIRONMENT
-edit superset statefulset "$REGISTRY/argonath-superset:$ARGONATH_VERSION" service $ENVIRONMENT
+edit anduin-gateway deployment "$REGISTRY/auth-gateway:$ANDUIN_VERSION" service $ENVIRONMENT
+edit cask deployment "$REGISTRY/argonath-worker:$ARGONATH_VERSION" service $ENVIRONMENT
+edit dagster/dagster-ui deployment "$REGISTRY/argonath-worker:$ARGONATH_VERSION" service $ENVIRONMENT
+edit dagster/dagster-daemon deployment "$REGISTRY/argonath-worker:$ARGONATH_VERSION" service $ENVIRONMENT
+edit dagster/dagster-celery-worker deployment "$REGISTRY/argonath-worker:$ARGONATH_VERSION" service $ENVIRONMENT
+edit superset statefulset "$REGISTRY/superset:$ANDUIN_VERSION" service $ENVIRONMENT
 edit postgres statefulset "$REGISTRY/anduin-pg:$POSTGRES_VERSION" database $ENVIRONMENT
 edit dagster-postgres statefulset "$REGISTRY/anduin-pg:$POSTGRES_VERSION" database $ENVIRONMENT
 
