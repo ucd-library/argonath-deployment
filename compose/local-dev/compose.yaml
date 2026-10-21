@@ -18,7 +18,7 @@ services:
       - ./initdb:/docker-entrypoint-initdb.d:ro
 
   dagster-ui:
-    image: ${IMAGE_ARGONATH_ARGONAUTH_WORKER}
+    image: ${IMAGE_ARGONATH_ARGONATH_WORKER}
     env_file:
       - .env
     environment:
@@ -55,7 +55,7 @@ services:
       - "3000:3000"
 
   dagster-daemon:
-    image: ${IMAGE_ARGONATH_ARGONAUTH_WORKER}
+    image: ${IMAGE_ARGONATH_ARGONATH_WORKER}
     env_file:
       - .env
     environment:
@@ -95,7 +95,7 @@ services:
     command: ["dagster-daemon", "run", "-w", "/opt/argonath/dagster/workspace.yaml"]
 
   dagster-celery-worker:
-    image: ${IMAGE_ARGONATH_ARGONAUTH_WORKER}
+    image: ${IMAGE_ARGONATH_ARGONATH_WORKER}
     env_file:
       - .env
     environment:
