@@ -77,6 +77,10 @@ services:
       - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
       - SHOWCASE_ES_HOST=http://elasticsearch:9200
       - SHOWCASE_ES_INDEX=${SHOWCASE_ES_INDEX:-item-write}
+      # dc-showcase postgres, for collection visibility
+      - DIGTK_SHOWCASE_PG_HOST=dcs-postgres
+      - DIGTK_SHOWCASE_PG_DATABASE=dcf
+      - DIGTK_SHOWCASE_PG_USER=postgres
     volumes:
       - dagster_storage:/opt/dagster/dagster_home/storage
       - ../../../argonath/dagster/lib:/opt/argonath/dagster/lib
@@ -116,6 +120,10 @@ services:
       - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
       - SHOWCASE_ES_HOST=http://elasticsearch:9200
       - SHOWCASE_ES_INDEX=${SHOWCASE_ES_INDEX:-item-write}
+      # dc-showcase postgres, for collection visibility
+      - DIGTK_SHOWCASE_PG_HOST=dcs-postgres
+      - DIGTK_SHOWCASE_PG_DATABASE=dcf
+      - DIGTK_SHOWCASE_PG_USER=postgres
     volumes:
       - dagster_storage:/opt/dagster/dagster_home/storage
       # dagster code
