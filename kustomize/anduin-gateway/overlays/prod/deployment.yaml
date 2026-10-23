@@ -1,4 +1,3 @@
-# NOTE: image is a placeholder — argonath has no dedicated build yet.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -8,6 +7,6 @@ spec:
     spec:
       containers:
         - name: service
-          image: us-west1-docker.pkg.dev/argonath/pub/argonath-gateway:prod
+          image: us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/auth-gateway:0.1.4
       nodeSelector:
         intended-for: argonath-prod-backend

@@ -3,8 +3,8 @@
 
   "environments" : {
     "prod" : {
-      "project" : "argonath",
-      "platform" : "libk8s",
+      "project" : "argonath-508815",
+      "platform" : "microk8s",
       "namespace" : "argonath-prod",
       "kubeconfig" : {
         "secret" : "libk8s-argonath-prod-deployer",
@@ -58,10 +58,24 @@
       }]
     },
     {
+      "k8sName" : "preservica-username",
+      "mappings" : [{
+        "gcsmName" : "libk8s-argonath-prod-preservica-username",
+        "k8sProperty" : "PRESERVICA_USERNAME"
+      }]
+    },
+    {
+      "k8sName" : "preservica-password",
+      "mappings" : [{
+        "gcsmName" : "libk8s-argonath-prod-preservica-password",
+        "k8sProperty" : "PRESERVICA_PASSWORD"
+      }]
+    },
+    {
       "k8sName" : "argonath-wildcard-tls",
       "tls" : true,
-      "certGcsmName" : "tls-wildcard-cert",
-      "keyGcsmName" : "tls-wildcard-key"
+      "certGcsmName" : "library-tls-wildcard-cert",
+      "keyGcsmName" : "library-tls-wildcard-key"
     }]
   },
 
@@ -86,11 +100,19 @@
       "group" : "anduin"
     },
     {
+      "path" : "kustomize/rabbitmq",
+      "group" : "anduin"
+    },
+    {
       "path" : "kustomize/dagster/dagster-ui",
       "group" : "anduin"
     },
     {
       "path" : "kustomize/dagster/dagster-daemon",
+      "group" : "anduin"
+    },
+    {
+      "path" : "kustomize/dagster/dagster-celery-worker",
       "group" : "anduin"
     },
     {

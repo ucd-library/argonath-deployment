@@ -15,10 +15,12 @@ spec:
     spec:
       containers:
       - name: database
-        image: us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/anduin-pg:main
+        image: us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/postgres:16
         args: ["-c", "max_connections=200"]
         imagePullPolicy: Always
         env:
+        - name: POSTGRES_DB
+          value: "dagster"
         - name: PGDATA
           value: "/var/lib/postgresql/data/pgdata"
         # Dagster's run/event-log storage takes a heavy read/write hit during
