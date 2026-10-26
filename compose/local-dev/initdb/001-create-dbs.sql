@@ -7,3 +7,6 @@ WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'dagster')\gexec
 
 SELECT 'CREATE DATABASE superset'
 WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'superset')\gexec
+
+SELECT 'CREATE DATABASE dcf'
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'dcf')\gexec
