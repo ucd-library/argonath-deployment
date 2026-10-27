@@ -16,6 +16,12 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
       - ./initdb:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - default
+      # dc-showcase uses it too
+      - argonath-shared
 
   dagster-ui:
     image: ${IMAGE_ARGONATH_ARGONATH_WORKER}
@@ -77,6 +83,11 @@ services:
       - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
       - SHOWCASE_ES_HOST=http://elasticsearch:9200
       - SHOWCASE_ES_INDEX=${SHOWCASE_ES_INDEX:-item-write}
+      # dc-showcase's dcf db, for collection visibility
+      - DIGTK_SHOWCASE_PG_HOST=postgres
+      - DIGTK_SHOWCASE_PG_DATABASE=dcf
+      - DIGTK_SHOWCASE_PG_USER=postgres
+      - DIGTK_SHOWCASE_PG_PASSWORD=postgres
     volumes:
       - dagster_storage:/opt/dagster/dagster_home/storage
       - ../../../argonath/dagster/lib:/opt/argonath/dagster/lib
@@ -86,6 +97,8 @@ services:
       - ../../../argonath/dagster/defs.py:/opt/argonath/dagster/defs.py
       # cli code
       - ../../../argonath/exec/digtk:/opt/argonath/exec/digtk
+      # for digtk showcase init-db
+      - ../../../dc-showcase/services/init/postgres:/opt/dc-showcase/init/postgres:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -116,6 +129,11 @@ services:
       - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
       - SHOWCASE_ES_HOST=http://elasticsearch:9200
       - SHOWCASE_ES_INDEX=${SHOWCASE_ES_INDEX:-item-write}
+      # dc-showcase's dcf db, for collection visibility
+      - DIGTK_SHOWCASE_PG_HOST=postgres
+      - DIGTK_SHOWCASE_PG_DATABASE=dcf
+      - DIGTK_SHOWCASE_PG_USER=postgres
+      - DIGTK_SHOWCASE_PG_PASSWORD=postgres
     volumes:
       - dagster_storage:/opt/dagster/dagster_home/storage
       # dagster code
