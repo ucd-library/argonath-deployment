@@ -21,12 +21,15 @@ echo "Setting up local development environment for user: $USERNAME"
 # install digtk's pg schemas: the collection registry (argonath schema), the
 # collection_state queue/results store Dagster's item jobs use, and the
 # reporting schema every derivative step writes to (--reporting-job-id), plus
-# dc-showcase's dcf schema. All are safe to re-run. Run in dagster-daemon, which has digtk and its
-# DIGTK_POSTGRES_* / DIGTK_REPORTING_PG_* env.
+# dc-showcase's dcf schema and gold seed files (hero banner, browse by
+# images; existing files are kept). All are safe to re-run. Run in
+# dagster-daemon, which has digtk, its DIGTK_POSTGRES_* /
+# DIGTK_REPORTING_PG_* env, and dc-showcase's init mounts.
 ./argonath-dc.sh exec dagster-daemon digtk collection init-pg
 ./argonath-dc.sh exec dagster-daemon digtk state init-pg
 ./argonath-dc.sh exec dagster-daemon digtk reporting init-db
 ./argonath-dc.sh exec dagster-daemon digtk showcase init-db
+./argonath-dc.sh exec dagster-daemon digtk showcase init-cask
 
 cask env set -t http -h  http://localhost:4000/cask -c dev argo-local-dev
 cask env default argo-local-dev
