@@ -235,7 +235,7 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
-      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit consumer_timeout 21600000
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit consumer_timeout 86400000 # 24h
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
