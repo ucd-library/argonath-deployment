@@ -16,6 +16,12 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
       - ./initdb:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - default
+      # dc-showcase uses it too
+      - argonath-shared
 
   dagster-ui:
     image: ${IMAGE_ARGONATH_ARGONATH_WORKER}
@@ -77,6 +83,11 @@ services:
       - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
       - SHOWCASE_ES_HOST=http://elasticsearch:9200
       - SHOWCASE_ES_INDEX=${SHOWCASE_ES_INDEX:-item-write}
+      # dc-showcase's dcf db, for collection visibility
+      - DIGTK_SHOWCASE_PG_HOST=postgres
+      - DIGTK_SHOWCASE_PG_DATABASE=dcf
+      - DIGTK_SHOWCASE_PG_USER=postgres
+      - DIGTK_SHOWCASE_PG_PASSWORD=postgres
     volumes:
       - dagster_storage:/opt/dagster/dagster_home/storage
       - ../../../argonath/dagster/lib:/opt/dagster/lib
@@ -86,6 +97,10 @@ services:
       - ../../../argonath/dagster/defs.py:/opt/dagster/defs.py
       # cli code
       - ../../../argonath/exec/digtk:/opt/argonath/exec/digtk
+      # for digtk showcase init-db
+      - ../../../dc-showcase/services/init/postgres:/opt/dc-showcase/init/postgres:ro
+      # for digtk showcase init-cask
+      - ../../../dc-showcase/services/init/caskfs:/opt/dc-showcase/init/caskfs:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -116,6 +131,11 @@ services:
       - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
       - SHOWCASE_ES_HOST=http://elasticsearch:9200
       - SHOWCASE_ES_INDEX=${SHOWCASE_ES_INDEX:-item-write}
+      # dc-showcase's dcf db, for collection visibility
+      - DIGTK_SHOWCASE_PG_HOST=postgres
+      - DIGTK_SHOWCASE_PG_DATABASE=dcf
+      - DIGTK_SHOWCASE_PG_USER=postgres
+      - DIGTK_SHOWCASE_PG_PASSWORD=postgres
     volumes:
       - dagster_storage:/opt/dagster/dagster_home/storage
       # dagster code
@@ -217,7 +237,7 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
-      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit consumer_timeout 21600000
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit consumer_timeout 86400000 # 24h
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
