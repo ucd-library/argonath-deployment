@@ -17,6 +17,9 @@ spec:
       - name: broker
         image: rabbitmq:3-management
         imagePullPolicy: Always
+        env:
+        - name: RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS
+          value: "-rabbit consumer_timeout 21600000" # 6h timeout (per step)
         resources:
           requests:
             memory: "200Mi"

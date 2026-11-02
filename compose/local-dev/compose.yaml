@@ -99,6 +99,8 @@ services:
       - ../../../argonath/exec/digtk:/opt/argonath/exec/digtk
       # for digtk showcase init-db
       - ../../../dc-showcase/services/init/postgres:/opt/dc-showcase/init/postgres:ro
+      # for digtk showcase init-cask
+      - ../../../dc-showcase/services/init/caskfs:/opt/dc-showcase/init/caskfs:ro
     depends_on:
       postgres:
         condition: service_healthy
