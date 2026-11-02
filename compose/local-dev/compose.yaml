@@ -40,17 +40,17 @@ services:
       - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
     volumes:
       - dagster_storage:/opt/dagster/dagster_home/storage
-      - ../../../argonath/dagster/lib:/opt/argonath/dagster/lib
-      - ../../../argonath/dagster/celery_config.yaml:/opt/argonath/dagster/celery_config.yaml
-      - ../../../argonath/dagster/workspace.yaml:/opt/argonath/dagster/workspace.yaml
-      - ../../../argonath/dagster/dagster.yaml:/opt/argonath/dagster/dagster.yaml
-      - ../../../argonath/dagster/defs.py:/opt/argonath/dagster/defs.py
+      - ../../../argonath/dagster/lib:/opt/dagster/lib
+      - ../../../argonath/dagster/celery_config.yaml:/opt/dagster/celery_config.yaml
+      - ../../../argonath/dagster/workspace.yaml:/opt/dagster/workspace.yaml
+      - ../../../argonath/dagster/dagster.yaml:/opt/dagster/dagster.yaml
+      - ../../../argonath/dagster/defs.py:/opt/dagster/defs.py
       # cli code
       - ../../../argonath/exec/digtk:/opt/argonath/exec/digtk 
     depends_on:
       postgres:
         condition: service_healthy
-    command: ["dagster-webserver", "--path-prefix", "/dagster", "-h", "0.0.0.0", "-p", "3000", "-w", "/opt/argonath/dagster/workspace.yaml"]
+    command: ["dagster-webserver", "--path-prefix", "/dagster", "-h", "0.0.0.0", "-p", "3000", "-w", "/opt/dagster/workspace.yaml"]
     ports:
       - "3000:3000"
 
@@ -79,11 +79,11 @@ services:
       - SHOWCASE_ES_INDEX=${SHOWCASE_ES_INDEX:-item-write}
     volumes:
       - dagster_storage:/opt/dagster/dagster_home/storage
-      - ../../../argonath/dagster/lib:/opt/argonath/dagster/lib
-      - ../../../argonath/dagster/celery_config.yaml:/opt/argonath/dagster/celery_config.yaml
-      - ../../../argonath/dagster/workspace.yaml:/opt/argonath/dagster/workspace.yaml
-      - ../../../argonath/dagster/dagster.yaml:/opt/argonath/dagster/dagster.yaml
-      - ../../../argonath/dagster/defs.py:/opt/argonath/dagster/defs.py
+      - ../../../argonath/dagster/lib:/opt/dagster/lib
+      - ../../../argonath/dagster/celery_config.yaml:/opt/dagster/celery_config.yaml
+      - ../../../argonath/dagster/workspace.yaml:/opt/dagster/workspace.yaml
+      - ../../../argonath/dagster/dagster.yaml:/opt/dagster/dagster.yaml
+      - ../../../argonath/dagster/defs.py:/opt/dagster/defs.py
       # cli code
       - ../../../argonath/exec/digtk:/opt/argonath/exec/digtk
     depends_on:
@@ -92,7 +92,7 @@ services:
     networks:
       - default
       - argonath-shared
-    command: ["dagster-daemon", "run", "-w", "/opt/argonath/dagster/workspace.yaml"]
+    command: ["dagster-daemon", "run", "-w", "/opt/dagster/workspace.yaml"]
 
   dagster-celery-worker:
     image: ${IMAGE_ARGONATH_ARGONATH_WORKER}
@@ -119,11 +119,11 @@ services:
     volumes:
       - dagster_storage:/opt/dagster/dagster_home/storage
       # dagster code
-      - ../../../argonath/dagster/lib:/opt/argonath/dagster/lib
-      - ../../../argonath/dagster/celery_config.yaml:/opt/argonath/dagster/celery_config.yaml
-      - ../../../argonath/dagster/workspace.yaml:/opt/argonath/dagster/workspace.yaml
-      - ../../../argonath/dagster/dagster.yaml:/opt/argonath/dagster/dagster.yaml
-      - ../../../argonath/dagster/defs.py:/opt/argonath/dagster/defs.py
+      - ../../../argonath/dagster/lib:/opt/dagster/lib
+      - ../../../argonath/dagster/celery_config.yaml:/opt/dagster/celery_config.yaml
+      - ../../../argonath/dagster/workspace.yaml:/opt/dagster/workspace.yaml
+      - ../../../argonath/dagster/dagster.yaml:/opt/dagster/dagster.yaml
+      - ../../../argonath/dagster/defs.py:/opt/dagster/defs.py
       # cli code
       - ../../../argonath/exec/digtk:/opt/argonath/exec/digtk
     depends_on:
@@ -134,7 +134,7 @@ services:
     networks:
       - default
       - argonath-shared
-    command: ["dagster-celery", "worker", "start", "-A", "dagster_celery.app", "-y", "/opt/argonath/dagster/celery_config.yaml"]
+    command: ["dagster-celery", "worker", "start", "-A", "dagster_celery.app", "-y", "/opt/dagster/celery_config.yaml"]
 
   cask:
     image: ${IMAGE_CASKFS_CASKFS}
