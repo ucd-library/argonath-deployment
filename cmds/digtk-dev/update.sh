@@ -41,5 +41,8 @@ USERNAME=$(whoami)
 
 echo "digtk-dev is up to date."
 
+cask env set -t http -h http://localhost:4000/cask -c dev digtk-dev
+cask env default digtk-dev
+
 cd "$SIBLING_ARGONATH/exec"
 DIGTK_GATEWAY_URL=http://localhost:4000 uv run digtk auth login --cask-env digtk-dev
