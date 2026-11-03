@@ -9,17 +9,18 @@ SIBLING_ARGONATH="$ROOT_DIR/../../../argonath"
 echo "Pulling argonath-deployment..."
 git pull
 
-echo "Pulling .env from digtk-dev-dot-env secret..."
+# local overrides go in .env.secrets instead
+echo "Pulling .env.default from digtk-dev-dot-env secret..."
 gcloud secrets versions access latest \
   --secret=digtk-dev-dot-env \
   --project=argonath-508815 \
-  > compose/digtk-dev/.env
+  > compose/digtk-dev/.env.default
 
 echo "Pulling images..."
-docker compose -f compose/digtk-dev/compose.yaml -p digtk-dev pull
+docker compose -f compose/digtk-dev/compose.yaml --env-file compose/digtk-dev/.env.default -p digtk-dev pull
 
 echo "Starting stack so schema/cask init can run..."
-docker compose -f compose/digtk-dev/compose.yaml -p digtk-dev up -d
+docker compose -f compose/digtk-dev/compose.yaml --env-file compose/digtk-dev/.env.default -p digtk-dev up -d
 
 cd $ROOT_DIR
 
@@ -40,6 +41,9 @@ USERNAME=$(whoami)
 ./dc.sh exec dagster-daemon digtk reporting init-db
 
 echo "digtk-dev is up to date."
+
+cask env set -t http -h http://localhost:4000/cask -c dev digtk-dev
+cask env default digtk-dev
 
 cd "$SIBLING_ARGONATH/exec"
 DIGTK_GATEWAY_URL=http://localhost:4000 uv run digtk auth login --cask-env digtk-dev

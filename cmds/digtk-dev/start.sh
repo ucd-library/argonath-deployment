@@ -8,7 +8,7 @@ SIBLING_ARGONATH="$REPO_ROOT/../argonath"
 
 cd "$REPO_ROOT"
 
-docker compose -f compose/digtk-dev/compose.yaml -p digtk-dev up -d
+docker compose -f compose/digtk-dev/compose.yaml --env-file compose/digtk-dev/.env.default -p digtk-dev up -d
 
 echo "digtk-dev deployment is up and running."
 echo " - Auth Gateway URL : http://localhost:4000"

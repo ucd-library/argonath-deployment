@@ -1,3 +1,5 @@
 .env
 service-account.json
 secrets
+.env.default
+.env.secrets

@@ -4,7 +4,9 @@ services:
   postgres:
     image: us-west1-docker.pkg.dev/argonath-508815/argo-dev/postgres:dev
     env_file:
-      - .env
+      - path: .env.default
+      - path: .env.secrets
+        required: false
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
@@ -20,7 +22,9 @@ services:
   dagster-ui:
     image: us-west1-docker.pkg.dev/argonath-508815/argo-dev/argonath-worker:dev
     env_file:
-      - .env
+      - path: .env.default
+      - path: .env.secrets
+        required: false
     environment:
       - DAGSTER_POSTGRES_HOST=postgres
       - DAGSTER_POSTGRES_DB=${DAGSTER_POSTGRES_DB:-dagster}
@@ -55,7 +59,9 @@ services:
   dagster-daemon:
     image: us-west1-docker.pkg.dev/argonath-508815/argo-dev/argonath-worker:dev
     env_file:
-      - .env
+      - path: .env.default
+      - path: .env.secrets
+        required: false
     environment:
       - DAGSTER_POSTGRES_HOST=postgres
       - DAGSTER_POSTGRES_DB=${DAGSTER_POSTGRES_DB:-dagster}
@@ -90,7 +96,9 @@ services:
   dagster-celery-worker:
     image: us-west1-docker.pkg.dev/argonath-508815/argo-dev/argonath-worker:dev
     env_file:
-      - .env
+      - path: .env.default
+      - path: .env.secrets
+        required: false
     environment:
       - DAGSTER_POSTGRES_HOST=postgres
       - DAGSTER_POSTGRES_DB=${DAGSTER_POSTGRES_DB:-dagster}
@@ -127,7 +135,9 @@ services:
   cask:
     image: us-west1-docker.pkg.dev/argonath-508815/argo-dev/caskfs:dev
     env_file:
-      - .env
+      - path: .env.default
+      - path: .env.secrets
+        required: false
     environment:
       - CASKFS_PG_HOST=postgres
       - CASKFS_ENABLE_POWERWASH=true
@@ -154,7 +164,9 @@ services:
   superset:
     image: us-west1-docker.pkg.dev/argonath-508815/argo-dev/superset:dev
     env_file:
-      - .env
+      - path: .env.default
+      - path: .env.secrets
+        required: false
     environment:
       - PGHOST=postgres
       - PGUSER=postgres
@@ -171,7 +183,9 @@ services:
   anduin-gateway:
     image: us-west1-docker.pkg.dev/argonath-508815/argo-dev/auth-gateway:dev
     env_file:
-      - .env
+      - path: .env.default
+      - path: .env.secrets
+        required: false
     environment:
       - PORT=4000
       - APP_NAME=DIGTK Dev
