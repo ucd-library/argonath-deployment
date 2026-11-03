@@ -10,7 +10,8 @@ cd $ROOT_DIR/..
 
 ALLOWED_ENVIRONMENTS=("prod")
 
-REGISTRY="us-west1-docker.pkg.dev/digital-ucdavis-edu/pub"
+REGISTRY="us-west1-docker.pkg.dev/argonath-508815/pub"
+ANDUIN_REGISTRY="us-west1-docker.pkg.dev/digital-ucdavis-edu/pub"
 ARGONATH_BUILD_REGISTRY_URL="https://raw.githubusercontent.com/ucd-library/cork-build-registry/refs/heads/main/repositories/argonath.json"
 PROJECT_ANDUIN_BUILD_REGISTRY_URL="https://raw.githubusercontent.com/ucd-library/cork-build-registry/refs/heads/main/repositories/project-anduin.json"
 
@@ -49,14 +50,14 @@ POSTGRES_VERSION=$(echo $JSON_DATA | jq -r ".builds[\"$ANDUIN_VERSION\"].postgre
 
 echo "Updating Argonath to version: $ARGONATH_VERSION (Anduin: $ANDUIN_VERSION, CaskFS: $CASKFS_VERSION, Postgres: $POSTGRES_VERSION)"
 
-edit anduin-gateway deployment "$REGISTRY/auth-gateway:$ANDUIN_VERSION" service $ENVIRONMENT
-edit cask deployment "$REGISTRY/argonath-worker:$ARGONATH_VERSION" service $ENVIRONMENT
+edit anduin-gateway deployment "$ANDUIN_REGISTRY/auth-gateway:$ANDUIN_VERSION" service $ENVIRONMENT
+edit cask deployment "$ANDUIN_REGISTRY/argonath-worker:$ARGONATH_VERSION" service $ENVIRONMENT
 edit dagster/dagster-ui deployment "$REGISTRY/argonath-worker:$ARGONATH_VERSION" service $ENVIRONMENT
 edit dagster/dagster-daemon deployment "$REGISTRY/argonath-worker:$ARGONATH_VERSION" service $ENVIRONMENT
 edit dagster/dagster-celery-worker deployment "$REGISTRY/argonath-worker:$ARGONATH_VERSION" service $ENVIRONMENT
-edit superset statefulset "$REGISTRY/superset:$ANDUIN_VERSION" service $ENVIRONMENT
-edit postgres statefulset "$REGISTRY/anduin-pg:$POSTGRES_VERSION" database $ENVIRONMENT
-edit dagster-postgres statefulset "$REGISTRY/anduin-pg:$POSTGRES_VERSION" database $ENVIRONMENT
+edit superset statefulset "$ANDUIN_REGISTRY/superset:$ANDUIN_VERSION" service $ENVIRONMENT
+edit postgres statefulset "$ANDUIN_REGISTRY/anduin-pg:$ANDUIN_VERSION" database $ENVIRONMENT
+edit dagster-postgres statefulset "$ANDUIN_REGISTRY/anduin-pg:$ANDUIN_VERSION" database $ENVIRONMENT
 
 echo ""
 read -p "Would you like to commit the changes to git? (y/n): " COMMIT_CHANGES
