@@ -16,8 +16,6 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
       - ./initdb:/docker-entrypoint-initdb.d:ro
-    ports:
-      - "5432:5432"
 
   dagster-ui:
     image: us-west1-docker.pkg.dev/argonath-508815/argo-dev/argonath-worker:dev
@@ -42,12 +40,17 @@ services:
       - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
     volumes:
       - dagster_storage:/opt/dagster/dagster_home/storage
+      - ../../../argonath/dagster/lib:/opt/dagster/dagster_home/lib
+      - ../../../argonath/dagster/celery_config.yaml:/opt/dagster/dagster_home/celery_config.yaml
+      - ../../../argonath/dagster/workspace.yaml:/opt/dagster/dagster_home/workspace.yaml
+      - ../../../argonath/dagster/dagster.yaml:/opt/dagster/dagster_home/dagster.yaml
+      - ../../../argonath/dagster/defs.py:/opt/dagster/dagster_home/defs.py
+      # cli code
+      - ../../../argonath/exec/digtk:/opt/argonath/exec/digtk
     depends_on:
       postgres:
         condition: service_healthy
-    command: ["dagster-webserver", "--path-prefix", "/dagster", "-h", "0.0.0.0", "-p", "3000", "-w", "/opt/dagster/workspace.yaml"]
-    ports:
-      - "3000:3000"
+    command: ["dagster-webserver", "--path-prefix", "/dagster", "-h", "0.0.0.0", "-p", "3000", "-w", "/opt/dagster/dagster_home/workspace.yaml"]
 
   dagster-daemon:
     image: us-west1-docker.pkg.dev/argonath-508815/argo-dev/argonath-worker:dev
@@ -72,10 +75,17 @@ services:
       - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
     volumes:
       - dagster_storage:/opt/dagster/dagster_home/storage
+      - ../../../argonath/dagster/lib:/opt/dagster/dagster_home/lib
+      - ../../../argonath/dagster/celery_config.yaml:/opt/dagster/dagster_home/celery_config.yaml
+      - ../../../argonath/dagster/workspace.yaml:/opt/dagster/dagster_home/workspace.yaml
+      - ../../../argonath/dagster/dagster.yaml:/opt/dagster/dagster_home/dagster.yaml
+      - ../../../argonath/dagster/defs.py:/opt/dagster/dagster_home/defs.py
+      # cli code
+      - ../../../argonath/exec/digtk:/opt/argonath/exec/digtk
     depends_on:
       postgres:
         condition: service_healthy
-    command: ["dagster-daemon", "run", "-w", "/opt/dagster/workspace.yaml"]
+    command: ["dagster-daemon", "run", "-w", "/opt/dagster/dagster_home/workspace.yaml"]
 
   dagster-celery-worker:
     image: us-west1-docker.pkg.dev/argonath-508815/argo-dev/argonath-worker:dev
@@ -99,12 +109,20 @@ services:
       - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
     volumes:
       - dagster_storage:/opt/dagster/dagster_home/storage
+      # dagster code
+      - ../../../argonath/dagster/lib:/opt/dagster/dagster_home/lib
+      - ../../../argonath/dagster/celery_config.yaml:/opt/dagster/dagster_home/celery_config.yaml
+      - ../../../argonath/dagster/workspace.yaml:/opt/dagster/dagster_home/workspace.yaml
+      - ../../../argonath/dagster/dagster.yaml:/opt/dagster/dagster_home/dagster.yaml
+      - ../../../argonath/dagster/defs.py:/opt/dagster/dagster_home/defs.py
+      # cli code
+      - ../../../argonath/exec/digtk:/opt/argonath/exec/digtk
     depends_on:
       rabbitmq:
         condition: service_started
       postgres:
         condition: service_healthy
-    command: ["dagster-celery", "worker", "start", "-A", "dagster_celery.app", "-y", "/opt/dagster/celery_config.yaml"]
+    command: ["dagster-celery", "worker", "start", "-A", "dagster_celery.app", "-y", "/opt/dagster/dagster_home/celery_config.yaml"]
 
   cask:
     image: us-west1-docker.pkg.dev/argonath-508815/argo-dev/caskfs:dev
@@ -132,8 +150,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    ports:
-      - "3001:3001"
 
   superset:
     image: us-west1-docker.pkg.dev/argonath-508815/argo-dev/superset:dev
@@ -151,8 +167,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    ports:
-      - "8088:8088"
 
   anduin-gateway:
     image: us-west1-docker.pkg.dev/argonath-508815/argo-dev/auth-gateway:dev
@@ -160,7 +174,7 @@ services:
       - .env
     environment:
       - PORT=4000
-      - APP_NAME=Argonath
+      - APP_NAME=DIGTK Dev
       - POSTGRES_PASSWORD=postgres
       - CASK_URL=http://cask:3001
       - DAGSTER_URL=http://dagster-ui:3000

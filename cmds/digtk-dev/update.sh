@@ -4,6 +4,7 @@ set -e
 
 ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $ROOT_DIR/../..
+SIBLING_ARGONATH="$ROOT_DIR/../../../argonath"
 
 echo "Pulling argonath-deployment..."
 git pull
@@ -39,3 +40,6 @@ USERNAME=$(whoami)
 ./dc.sh exec dagster-daemon digtk reporting init-db
 
 echo "digtk-dev is up to date."
+
+cd "$SIBLING_ARGONATH/exec"
+DIGTK_GATEWAY_URL=http://localhost:4000 uv run digtk auth login --cask-env digtk-dev

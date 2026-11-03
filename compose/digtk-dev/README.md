@@ -2,17 +2,25 @@
 
 A self-contained docker-compose stack for developers working on
 [digtk](https://github.com/ucd-library/argonath/tree/main/exec/digtk) (the
-`argonath/exec/digtk` CLI/library). Unlike `compose/local-dev/`, this stack has
-**no source bind-mounts** - every image is a pre-built, pushed `:dev` tag from
-`us-west1-docker.pkg.dev/argonath-508815/argo-dev`, hardcoded in
-`compose.yaml`. It doesn't depend on, or share a network with,
-`compose/local-dev/` - it runs entirely on its own.
+`argonath/exec/digtk` CLI/library). Every image is a pre-built, pushed `:dev`
+tag from `us-west1-docker.pkg.dev/argonath-508815/argo-dev`, hardcoded in
+`compose.yaml` - project-anduin (dagster/superset/auth-gateway) and caskfs are
+not live-mounted, since you're not meant to be editing their code here. The
+`dagster-ui`/`dagster-daemon`/`dagster-celery-worker` services do live-mount
+argonath's own `dagster/` config and `exec/digtk` code from your sibling
+checkout, same as `compose/local-dev/`, so editing digtk and restarting
+(`./cmds/digtk-dev/stop.sh && ./cmds/digtk-dev/start.sh`) picks up changes
+without a rebuild - `build.sh`/`update.sh` are only needed when the image
+itself needs to change (new deps, Dockerfile changes, etc), or to publish your
+changes for other digtk-dev users. It doesn't depend on, or share a network
+with, `compose/local-dev/` - it runs entirely on its own.
 
 ## Requires
 
 A sibling checkout of [argonath](https://github.com/ucd-library/argonath) at
-the same level as `argonath-deployment`'s parent dir (used by
-`cmds/digtk-dev/start.sh` to run `uv run digtk auth login`).
+the same level as `argonath-deployment`'s parent dir - live-mounted into the
+dagster services (see above) and used by `cmds/digtk-dev/start.sh` to run
+`uv run digtk auth login`.
 
 ## Dev loop
 
