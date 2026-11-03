@@ -2,6 +2,16 @@
 
 set -e
 
+REFRESH_ENV=false
+
+for arg in "$@"; do
+  case $arg in
+    --refresh-env)
+      REFRESH_ENV=true
+      ;;
+  esac
+done
+
 ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $ROOT_DIR/../..
 SIBLING_ARGONATH="$ROOT_DIR/../../../argonath"
@@ -9,11 +19,16 @@ SIBLING_ARGONATH="$ROOT_DIR/../../../argonath"
 echo "Pulling argonath-deployment..."
 git pull
 
-echo "Pulling .env from digtk-dev-dot-env secret..."
-gcloud secrets versions access latest \
-  --secret=digtk-dev-dot-env \
-  --project=argonath-508815 \
-  > compose/digtk-dev/.env
+# keep local edits like SAMWISE_API_KEY
+if [ -f compose/digtk-dev/.env ] && [ "$REFRESH_ENV" = false ]; then
+  echo "Keeping existing compose/digtk-dev/.env (pass --refresh-env to overwrite)."
+else
+  echo "Pulling .env from digtk-dev-dot-env secret..."
+  gcloud secrets versions access latest \
+    --secret=digtk-dev-dot-env \
+    --project=argonath-508815 \
+    > compose/digtk-dev/.env
+fi
 
 echo "Pulling images..."
 docker compose -f compose/digtk-dev/compose.yaml -p digtk-dev pull

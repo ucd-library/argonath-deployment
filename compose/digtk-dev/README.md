@@ -45,9 +45,11 @@ Once up:
 
 ## Notes
 
-- `.env` in this directory is managed entirely by `update.sh` (pulled fresh
-  from the `digtk-dev-dot-env` secret in GCP Secret Manager, project
-  `argonath-508815`) - see `.env.example` for the fields it contains. It is
-  gitignored; there's no manual copy-and-fill step.
+- `.env` in this directory is created by `update.sh` the first time it runs
+  (pulled from the `digtk-dev-dot-env` secret in GCP Secret Manager, project
+  `argonath-508815`) - see `.env.example` for the fields it contains. After
+  that `update.sh` leaves it alone, so local edits like `SAMWISE_API_KEY`
+  survive; pass `--refresh-env` to overwrite it with the latest secret. It is
+  gitignored.
 - This stack does not include dc-showcase/elasticsearch integration - the
   `digtk showcase ...` subcommands aren't initialized here.
