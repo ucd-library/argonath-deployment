@@ -1,0 +1,196 @@
+services:
+
+  # --- shared postgres instance (cask, anduin-gateway share the default db; dagster/superset get their own) ---
+  postgres:
+    image: us-west1-docker.pkg.dev/argonath-508815/argo-dev/postgres:dev
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"
+
+  dagster-ui:
+    image: us-west1-docker.pkg.dev/argonath-508815/argo-dev/argonath-worker:dev
+    env_file:
+      - .env
+    environment:
+      - DAGSTER_POSTGRES_HOST=postgres
+      - DAGSTER_POSTGRES_DB=${DAGSTER_POSTGRES_DB:-dagster}
+      - DAGSTER_POSTGRES_USER=postgres
+      - DAGSTER_POSTGRES_PASSWORD=postgres
+      - DIGTK_POSTGRES_HOST=postgres
+      - DIGTK_POSTGRES_DB=postgres
+      - DIGTK_POSTGRES_USER=postgres
+      - DIGTK_POSTGRES_PASSWORD=postgres
+      # for now, digtk reporting db same as above, but in 'reporting' schema
+      - DIGTK_REPORTING_PG_HOST=postgres
+      - DIGTK_REPORTING_PG_DATABASE=postgres
+      - DIGTK_REPORTING_PG_USER=postgres
+      - DIGTK_REPORTING_PG_PASSWORD=postgres
+      - CASK_API_URL=${CASK_API_URL:-http://cask:3001/cask/api}
+      - CASK_TRUSTED_USER=${CASK_TRUSTED_USER:-dagster}
+      - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
+    volumes:
+      - dagster_storage:/opt/dagster/dagster_home/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["dagster-webserver", "--path-prefix", "/dagster", "-h", "0.0.0.0", "-p", "3000", "-w", "/opt/dagster/workspace.yaml"]
+    ports:
+      - "3000:3000"
+
+  dagster-daemon:
+    image: us-west1-docker.pkg.dev/argonath-508815/argo-dev/argonath-worker:dev
+    env_file:
+      - .env
+    environment:
+      - DAGSTER_POSTGRES_HOST=postgres
+      - DAGSTER_POSTGRES_DB=${DAGSTER_POSTGRES_DB:-dagster}
+      - DAGSTER_POSTGRES_USER=postgres
+      - DAGSTER_POSTGRES_PASSWORD=postgres
+      - DIGTK_POSTGRES_HOST=postgres
+      - DIGTK_POSTGRES_DB=postgres
+      - DIGTK_POSTGRES_USER=postgres
+      - DIGTK_POSTGRES_PASSWORD=postgres
+      # See dagster-ui's identical block above for why each of these is set.
+      - DIGTK_REPORTING_PG_HOST=postgres
+      - DIGTK_REPORTING_PG_DATABASE=postgres
+      - DIGTK_REPORTING_PG_USER=postgres
+      - DIGTK_REPORTING_PG_PASSWORD=postgres
+      - CASK_API_URL=${CASK_API_URL:-http://cask:3001/cask/api}
+      - CASK_TRUSTED_USER=${CASK_TRUSTED_USER:-dagster}
+      - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
+    volumes:
+      - dagster_storage:/opt/dagster/dagster_home/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["dagster-daemon", "run", "-w", "/opt/dagster/workspace.yaml"]
+
+  dagster-celery-worker:
+    image: us-west1-docker.pkg.dev/argonath-508815/argo-dev/argonath-worker:dev
+    env_file:
+      - .env
+    environment:
+      - DAGSTER_POSTGRES_HOST=postgres
+      - DAGSTER_POSTGRES_DB=${DAGSTER_POSTGRES_DB:-dagster}
+      - DAGSTER_POSTGRES_USER=postgres
+      - DAGSTER_POSTGRES_PASSWORD=postgres
+      - DIGTK_POSTGRES_HOST=postgres
+      - DIGTK_POSTGRES_DB=postgres
+      - DIGTK_POSTGRES_USER=postgres
+      - DIGTK_POSTGRES_PASSWORD=postgres
+      - DIGTK_REPORTING_PG_HOST=postgres
+      - DIGTK_REPORTING_PG_DATABASE=postgres
+      - DIGTK_REPORTING_PG_USER=postgres
+      - DIGTK_REPORTING_PG_PASSWORD=postgres
+      - CASK_API_URL=${CASK_API_URL:-http://cask:3001/cask/api}
+      - CASK_TRUSTED_USER=${CASK_TRUSTED_USER:-dagster}
+      - CASK_ROOT=${CASK_ROOT:-http://cask:3001}
+    volumes:
+      - dagster_storage:/opt/dagster/dagster_home/storage
+    depends_on:
+      rabbitmq:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    command: ["dagster-celery", "worker", "start", "-A", "dagster_celery.app", "-y", "/opt/dagster/celery_config.yaml"]
+
+  cask:
+    image: us-west1-docker.pkg.dev/argonath-508815/argo-dev/caskfs:dev
+    env_file:
+      - .env
+    environment:
+      - CASKFS_PG_HOST=postgres
+      - CASKFS_ENABLE_POWERWASH=true
+      - CASKFS_ROOT_DIR=/opt/cask
+      - CASKFS_WEBAPP_ENV=dev
+      - CASKFS_AUDIT_ENABLED=true
+      - CASKFS_HEADER_AUTH_ENABLED=true
+      - CASKFS_HEADER_AUTH_HEADER=x-anduin-user
+      - CASKFS_WEBAPP_PORT=3001
+      - CASKFS_WEBAPP_PATH_PREFIX=/cask
+      - CASKFS_ACL_ENABLED=false
+      # CaskFS only RDF-indexes values matching CASKFS_FILTER_URI_MATCHES (see
+      # docs/ld.md). /cask/find?subject=...&predicate=... ANDs two separate
+      # lookups, so both the ark value and its https://schema.org/ark
+      # predicate need their own pattern here, or the query returns nothing.
+      # digtk.lib.items.resolve() (every ARK lookup) depends on this.
+      - CASKFS_FILTER_URI_MATCHES=^https://schema\.org/,^ark:/
+    volumes:
+      - caskfs_data:/opt/cask
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "3001:3001"
+
+  superset:
+    image: us-west1-docker.pkg.dev/argonath-508815/argo-dev/superset:dev
+    env_file:
+      - .env
+    environment:
+      - PGHOST=postgres
+      - PGUSER=postgres
+      - PGPASSWORD=postgres
+      - PGDATABASE=superset
+      - SUPERSET_APP_ROOT=/superset
+    volumes:
+      - superset_home:/app/superset_home
+      - superset_init:/etc/superset/init
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8088:8088"
+
+  anduin-gateway:
+    image: us-west1-docker.pkg.dev/argonath-508815/argo-dev/auth-gateway:dev
+    env_file:
+      - .env
+    environment:
+      - PORT=4000
+      - APP_NAME=Argonath
+      - POSTGRES_PASSWORD=postgres
+      - CASK_URL=http://cask:3001
+      - DAGSTER_URL=http://dagster-ui:3000
+      - ANDUIN_APP_URL=http://localhost:4000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "4000:4000"
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit consumer_timeout 86400000 # 24h
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+volumes:
+  pg_data:
+    driver: local
+  dagster_storage:
+    driver: local
+  caskfs_data:
+    driver: local
+  superset_home:
+    driver: local
+  superset_init:
+    driver: local
+  rabbitmq_data:
+    driver: local

@@ -7,16 +7,16 @@ USERNAME=${1:-$(whoami)}
 echo "Setting up local development environment for user: $USERNAME"
 
 # Build the fulllocal development environment
-# ./build-local-dev.sh --all
+# ./build.sh --all
 
 # Start the local development environment
 # ./up.sh
 
 # install the pg cask tables and add yourself as an admin user
-./argonath-dc.sh exec cask cask init-pg
-./argonath-dc.sh exec cask cask -i admin  acl user-role-set $USERNAME admin
-./argonath-dc.sh exec cask cask -i admin  acl user-role-set dagster admin
-./argonath-dc.sh exec cask cask -i admin  acl user-role-set dcs-gateway admin
+./dc.sh exec cask cask init-pg
+./dc.sh exec cask cask -i admin  acl user-role-set $USERNAME admin
+./dc.sh exec cask cask -i admin  acl user-role-set dagster admin
+./dc.sh exec cask cask -i admin  acl user-role-set dcs-gateway admin
 
 # install digtk's pg schemas: the collection registry (argonath schema), the
 # collection_state queue/results store Dagster's item jobs use, and the
@@ -25,15 +25,15 @@ echo "Setting up local development environment for user: $USERNAME"
 # images; existing files are kept). All are safe to re-run. Run in
 # dagster-daemon, which has digtk, its DIGTK_POSTGRES_* /
 # DIGTK_REPORTING_PG_* env, and dc-showcase's init mounts.
-./argonath-dc.sh exec dagster-daemon digtk collection init-pg
-./argonath-dc.sh exec dagster-daemon digtk state init-pg
-./argonath-dc.sh exec dagster-daemon digtk reporting init-db
-./argonath-dc.sh exec dagster-daemon digtk showcase init-db
-./argonath-dc.sh exec dagster-daemon digtk showcase init-cask
+./dc.sh exec dagster-daemon digtk collection init-pg
+./dc.sh exec dagster-daemon digtk state init-pg
+./dc.sh exec dagster-daemon digtk reporting init-db
+./dc.sh exec dagster-daemon digtk showcase init-db
+./dc.sh exec dagster-daemon digtk showcase init-cask
 
 cask env set -t http -h  http://localhost:4000/cask -c dev argo-local-dev
 cask env default argo-local-dev
-cd ../../argonath/exec
+cd ../../../argonath/exec
 DIGTK_GATEWAY_URL=http://localhost:4000 uv run digtk auth login --cask-env argo-local-dev
 cd $ROOT_DIR
-cask auto-path load ../../argonath/cask/auto-path-rules.json
+cask auto-path load ../../../argonath/cask/auto-path-rules.json
