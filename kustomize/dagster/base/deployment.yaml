@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: service
-        image: us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/dagster:main
+        image: s-west1-docker.pkg.dev/argonath-508815/pub/dagster:main
         imagePullPolicy: Always
         resources:
           requests:

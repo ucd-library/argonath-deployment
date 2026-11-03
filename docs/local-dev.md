@@ -44,16 +44,16 @@ See [prerequisites](prerequisites.md) for what you need installed.
 
 5. Run the init script:
    ```sh
-   ./cmds/init.sh
+   ./cmds/local-dev/init.sh
    ```
    This does three things in order:
-   1. `build-local-dev.sh --all` — builds every image the stack needs
+   1. `build.sh --all` — builds every image the stack needs
       (project-anduin and caskfs, each with `--depth ALL` so their own
       dependencies get built too, then argonath itself), tagging them
       `sandbox` and writing the resulting `IMAGE_*` vars into
       `compose/local-dev/.env`.
    2. `up.sh` — brings the whole compose stack up.
-   3. `argonath-dc.sh exec cask cask init-pg` — initializes the CaskFS schema
+   3. `dc.sh exec cask cask init-pg` — initializes the CaskFS schema
       in postgres.
 
    It's a one-time (or occasional full-rebuild) step — day to day you'll use
@@ -62,7 +62,7 @@ See [prerequisites](prerequisites.md) for what you need installed.
 ## Bring the stack up
 
 ```sh
-./cmds/up.sh
+./cmds/local-dev/up.sh
 ```
 
 | Service        | URL                     |
@@ -72,24 +72,24 @@ See [prerequisites](prerequisites.md) for what you need installed.
 | Cask           | http://localhost:3001    |
 | Superset       | http://localhost:8088    |
 
-`./cmds/down.sh` to tear it down.
+`./cmds/local-dev/down.sh` to tear it down.
 
 
 ## Interacting with the running stack
 
-`./cmds/argonath-dc.sh` is a thin wrapper around `docker compose -p argonath`,
+`./cmds/local-dev/dc.sh` is a thin wrapper around `docker compose -p argonath`,
 scoped to `compose/local-dev/compose.yaml` — any `docker compose` subcommand
 works:
 
 ```sh
 # open a shell in a service's container
-./cmds/argonath-dc.sh exec dagster-celery-worker bash
+./cmds/local-dev/dc.sh exec dagster-celery-worker bash
 
 # list running containers for this stack
-./cmds/argonath-dc.sh ps
+./cmds/local-dev/dc.sh ps
 
 # tail logs for one service
-./cmds/argonath-dc.sh logs -f dagster-daemon
+./cmds/local-dev/dc.sh logs -f dagster-daemon
 ```
 
 Service names are the keys under `services:` in `compose/local-dev/compose.yaml`
@@ -103,12 +103,12 @@ once via `--all` and don't need rebuilding unless you're changing their
 code too):
 
 ```sh
-./cmds/build-local-dev.sh
-./cmds/down.sh
-./cmds/up.sh
+./cmds/local-dev/build.sh
+./cmds/local-dev/down.sh
+./cmds/local-dev/up.sh
 ```
 
-`build-local-dev.sh` with no args runs `cork-kube build exec -p argonath`
+`build.sh` with no args runs `cork-kube build exec -p argonath`
 against `main` (pass a branch/tag as the first arg to build something else),
 `--depth 1` by default, so it only rebuilds argonath's own image(s) and
 rewrites their `IMAGE_ARGONATH_*` tags in `.env`. `down.sh`/`up.sh` then
@@ -133,11 +133,11 @@ To wipe everything — containers and named volumes (postgres data, caskfs
 data, superset home, rabbitmq data) — and start from scratch:
 
 ```sh
-./cmds/argonath-dc.sh down -v
+./cmds/local-dev/dc.sh down -v
 ```
 
 You'll need to re-run the Superset one-time init and `cask init-pg` (either
-by hand, or by re-running `./cmds/init.sh`) after this.
+by hand, or by re-running `./cmds/local-dev/init.sh`) after this.
 
 Note: `compose/local-dev/initdb/*.sql` (which creates the `dagster` and
 `superset` databases, and the `auth_gateway` schema in the default `postgres`

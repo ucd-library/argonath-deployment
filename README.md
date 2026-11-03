@@ -20,8 +20,15 @@ still run ad hoc via compose for local dev.
   `intended-for=argonath-prod-backend`
 - `compose/local-dev/` — self-contained docker-compose stack for local dev
   (flattens argonath's own compose file together with project-anduin's)
-- `cmds/` — helper scripts for local dev (`init.sh`, `up.sh`, `down.sh`,
-  `argonath-dc.sh`)
+- `compose/digtk-dev/` — self-contained docker-compose stack for digtk
+  developers, running entirely off pre-built `:dev` images from
+  `us-west1-docker.pkg.dev/argonath-508815/argo-dev` (no source bind-mounts)
+- `cmds/local-dev/` — helper scripts for the `local-dev` stack (`init.sh`,
+  `up.sh`, `down.sh`, `dc.sh`, `build.sh`)
+- `cmds/digtk-dev/` — helper scripts for the `digtk-dev` stack (`build.sh`,
+  `update.sh`, `start.sh`, `stop.sh`, `dc.sh`)
+- `cmds/update-deployment.sh` — bumps prod kustomize overlays to a new
+  argonath build version
 - `docs/` — [prerequisites](docs/prerequisites.md),
   [local dev](docs/local-dev.md), [prod cluster](docs/prod-cluster.md)
 

@@ -10,7 +10,7 @@ Needed to just run the stack via `docker compose`:
 - **[git](https://git-scm.com/downloads)** — clone this repo and its 3
   sibling repos (`argonath`, `project-anduin`, `caskfs`).
 - **[cork-kube](https://github.com/ucd-library/cork-kube)** — builds/registers
-  the local images (`cmds/build-local-dev.sh`, `cmds/init.sh`).
+  the local images (`cmds/local-dev/build.sh`, `cmds/local-dev/init.sh`).
 - **[gcloud CLI](https://cloud.google.com/sdk/docs/install)** — pulls
   `OIDC_CLIENT_SECRET` from GCP Secret Manager during first-time setup.
 - **[openssl](https://openssl-library.org/source/)** — generates dev-only
