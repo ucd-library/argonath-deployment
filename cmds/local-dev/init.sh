@@ -30,10 +30,14 @@ echo "Setting up local development environment for user: $USERNAME"
 # install dc-showcase's dcf schema and gold seed files (hero banner, browse
 # by images; existing files are kept). Safe to re-run. Needs the dc-showcase
 # stack up (dc-showcase-deployment/cmds/local-dev/up.sh); dc.sh has no -f,
-# so run it from dc-showcase's compose dir.
-cd ../../dc-showcase-deployment/compose/local-dev
-../../cmds/local-dev/dc.sh exec client node bin/init-db.js
-../../cmds/local-dev/dc.sh exec client node bin/init-cask.js
+# so run it from dc-showcase's compose dir. dc-showcase-deployment is a
+# sibling of argonath-deployment, three levels up from here.
+DCS_DEPLOY_DIR="$ROOT_DIR/../../../dc-showcase-deployment"
+(
+  cd "$DCS_DEPLOY_DIR/compose/local-dev" || exit 1
+  "$DCS_DEPLOY_DIR/cmds/local-dev/dc.sh" exec client node bin/init-db.js
+  "$DCS_DEPLOY_DIR/cmds/local-dev/dc.sh" exec client node bin/init-cask.js
+) || echo "WARNING: dc-showcase init failed; is its stack up?"
 cd $ROOT_DIR
 
 cask env set -t http -h  http://localhost:4000/cask -c dev argo-local-dev
