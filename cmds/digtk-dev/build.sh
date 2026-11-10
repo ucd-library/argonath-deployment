@@ -54,7 +54,7 @@ cork-kube build exec \
 echo ""
 echo "Pushing built images to $TARGET_REGISTRY ..."
 
-while IFS='=' read -r VAR_NAME LOCAL_IMAGE; do
+while IFS='=' read -r VAR_NAME LOCAL_IMAGE || [[ -n "$VAR_NAME" ]]; do
   [[ "$VAR_NAME" == IMAGE_* ]] || continue
   [[ -z "$LOCAL_IMAGE" ]] && continue
 
