@@ -31,12 +31,11 @@ USERNAME=$(whoami)
 ./dc.sh exec cask cask -i admin acl user-role-set $USERNAME admin
 ./dc.sh exec cask cask -i admin acl user-role-set dagster admin
 
-# install digtk's pg schemas: the collection registry (argonath schema), the
-# collection_state queue/results store Dagster's item jobs use, and the
-# reporting schema every derivative step writes to (--reporting-job-id). All
-# are safe to re-run. Run in dagster-daemon, which has digtk and its
-# DIGTK_POSTGRES_* / DIGTK_REPORTING_PG_* env.
-./dc.sh exec dagster-daemon digtk collection init-pg
+# install digtk's pg schemas: collection_registry (collection registrations,
+# the queue/results store Dagster's item jobs use) and the reporting schema
+# every derivative step writes to (--reporting-job-id). Both are safe to
+# re-run. Run in dagster-daemon, which has digtk and its DIGTK_POSTGRES_* /
+# DIGTK_REPORTING_PG_* env.
 ./dc.sh exec dagster-daemon digtk state init-pg
 ./dc.sh exec dagster-daemon digtk reporting init-db
 
