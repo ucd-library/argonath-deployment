@@ -29,6 +29,9 @@ still run ad hoc via compose for local dev.
   `update.sh`, `start.sh`, `stop.sh`, `dc.sh`)
 - `cmds/update-deployment.sh` — bumps prod kustomize overlays to a new
   argonath build version
+- `cmds/init-prod.sh` — initializes the prod k8s environment (pg schemas,
+  cask admin roles, dc-showcase seed, auto-path rules) by exec-ing into
+  running pods; run from your laptop: `./cmds/init-prod.sh <keycloak-username>`
 - `docs/` — [prerequisites](docs/prerequisites.md),
   [local dev](docs/local-dev.md), [prod cluster](docs/prod-cluster.md)
 
