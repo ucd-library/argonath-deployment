@@ -72,6 +72,13 @@
       }]
     },
     {
+      "k8sName" : "cask-admin-users",
+      "mappings" : [{
+        "gcsmName" : "libk8s-argonath-prod-cask-admin-users",
+        "k8sProperty" : "CASK_ADMIN_USERS"
+      }]
+    },
+    {
       "k8sName" : "argonath-wildcard-tls",
       "tls" : true,
       "certGcsmName" : "library-tls-wildcard-cert",

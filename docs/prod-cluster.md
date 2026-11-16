@@ -25,6 +25,39 @@ All workloads in this repo schedule onto nodes labeled
    `harvest` image).
 4. `cork-kube deploy -e prod` (see cork-kube's own docs for exact invocation).
 
+## Initializing production
+
+Once postgres is up, run the init Job. It uses the `argonath-worker` image
+(which has the `cask` and `digtk` CLIs) and runs the `argonath-prod-init`
+script baked into it (`cmds/prod-init.sh` in the argonath repo).
+
+1. Create the `libk8s-argonath-prod-cask-admin-users` GCSM secret: a comma
+   separated list of the users to grant the cask `admin` role
+   (`dagster` and `dcs-gateway` are always granted it).
+2. Deploy secrets: `cork-kube secrets deploy prod` (see cork-kube's own docs
+   for exact invocation).
+3. Run the job:
+
+```bash
+./cmds/prod-init.sh prod
+```
+
+The job creates the `superset` and `dcf` databases and the `auth_gateway`
+schema, runs `cask init-pg`, grants the cask admin roles, installs digtk's
+`state` and `reporting` schemas and loads the cask auto-path rules. Every step
+is safe to re-run. `kustomize/init` is intentionally not listed under
+`services` in `.cork-kube-config` (Jobs are immutable), so `cork-kube deploy`
+never applies it; the script deletes any previous `init` Job before applying.
+
+dc-showcase has its own init Job (the `dcf` schema and its cask gold seed
+files). Run it afterwards, from dc-showcase-deployment, since it depends on
+the `dcf` database, the cask tables and the `dcs-gateway` cask admin role
+created above:
+
+```bash
+./cmds/prod-init.sh prod
+```
+
 ## Updating a deployed image
 
 ```bash

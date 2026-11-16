@@ -1,0 +1,48 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: init
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: service
+        image: us-west1-docker.pkg.dev/argonath-508815/pub/argonath-worker:main
+        imagePullPolicy: Always
+        args: ["argonath-prod-init"]
+        resources:
+          requests:
+            memory: "200Mi"
+            cpu: "200m"
+        env:
+          - name: CASKFS_PG_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgres-password
+                key: POSTGRES_PASSWORD
+          - name: DIGTK_POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgres-password
+                key: POSTGRES_PASSWORD
+          - name: DIGTK_REPORTING_PG_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgres-password
+                key: POSTGRES_PASSWORD
+        envFrom:
+          - configMapRef:
+              name: app-config
+          - secretRef:
+              name: postgres-password
+          - secretRef:
+              name: cask-admin-users
+        volumeMounts:
+          - name: caskfs-volume-claim
+            mountPath: /opt/cache
+      volumes:
+      - name: caskfs-volume-claim
+        persistentVolumeClaim:
+          claimName: caskfs

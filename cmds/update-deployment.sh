@@ -55,6 +55,7 @@ edit cask deployment "$ANDUIN_REGISTRY/argonath-worker:$ARGONATH_VERSION" servic
 edit dagster/dagster-ui deployment "$REGISTRY/argonath-worker:$ARGONATH_VERSION" service $ENVIRONMENT
 edit dagster/dagster-daemon deployment "$REGISTRY/argonath-worker:$ARGONATH_VERSION" service $ENVIRONMENT
 edit dagster/dagster-celery-worker deployment "$REGISTRY/argonath-worker:$ARGONATH_VERSION" service $ENVIRONMENT
+edit init job "$REGISTRY/argonath-worker:$ARGONATH_VERSION" service $ENVIRONMENT
 edit superset statefulset "$ANDUIN_REGISTRY/superset:$ANDUIN_VERSION" service $ENVIRONMENT
 edit postgres statefulset "$ANDUIN_REGISTRY/anduin-pg:$ANDUIN_VERSION" database $ENVIRONMENT
 edit dagster-postgres statefulset "$ANDUIN_REGISTRY/anduin-pg:$ANDUIN_VERSION" database $ENVIRONMENT
