@@ -139,7 +139,10 @@ data, superset home, rabbitmq data) — and start from scratch:
 You'll need to re-run the Superset one-time init and `cask init-pg` (either
 by hand, or by re-running `./cmds/local-dev/init.sh`) after this.
 
-Note: `compose/local-dev/initdb/*.sql` (which creates the `dagster` and
-`superset` databases, and the `auth_gateway` schema in the default `postgres`
-database) only runs against a fresh, empty `pg_data` volume, so it only takes
-effect after a hard reset like this — not on a plain `down.sh`/`up.sh`.
+Note: `compose/local-dev/initdb/*.sql` only creates what a service needs
+before it can start: the `dagster`, `superset` and `dcf` databases, and the
+`auth_gateway` schema (anduin-gateway crashes at boot without it). It only
+runs against a fresh, empty `pg_data` volume, so it only takes effect after a
+hard reset like this — not on a plain `down.sh`/`up.sh`. Every other schema
+(CaskFS, `collection_registry`, `reporting`, dc-showcase's `dcf` schemas) is
+created by `./cmds/local-dev/init.sh`, which is safe to re-run.
