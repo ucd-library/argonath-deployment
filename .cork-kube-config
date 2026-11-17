@@ -88,6 +88,9 @@
 
   "services" : [
     {
+      "path" : "kustomize/init"
+    },
+    {
       "path" : "kustomize/app-env"
     },
     {
