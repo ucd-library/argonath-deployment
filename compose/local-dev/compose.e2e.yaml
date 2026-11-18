@@ -1,0 +1,23 @@
+# Env overrides for the dc-showcase e2e suite (dc-showcase-deployment/e2e).
+# Layered on compose.yaml by cmds/local-dev/up.sh --e2e:
+#   - sensors start running and tick every 30s instead of 300s
+#   - the cask-audit settle window drops from 300s to 30s
+#   - only folders tagged argonath=e2e-testing are discovered and sent to
+#     the digital-dev showcase; dev (public-showcase-dev) and prod folders on
+#     the shared Preservica tenant are ignored
+x-e2e-env: &e2e-env
+  ARGONATH_SENSORS_DEFAULT_RUNNING: "true"
+  ARGONATH_SENSOR_INTERVAL_SECONDS: "30"
+  ARGONATH_CASK_AUDIT_SETTLE_SECONDS: "30"
+  # e2e-testing-bronze: the suite's control folder, discovered but never published
+  ARGONATH_DISCOVERY_TAGS: e2e-testing,e2e-testing-bronze
+  DIGTK_SHOWCASE_PUBLISH_TAG: e2e-testing
+  DIGTK_SHOWCASE_GOLD_PROJECT: digital-dev
+
+services:
+  dagster-ui:
+    environment: *e2e-env
+  dagster-daemon:
+    environment: *e2e-env
+  dagster-celery-worker:
+    environment: *e2e-env

@@ -239,7 +239,8 @@ services:
 
 networks:
   argonath-shared:
-    name: argonath-shared
+    # overridable so a second stack (e.g. the e2e one) gets its own network
+    name: ${ARGONATH_SHARED_NETWORK:-argonath-shared}
 
 volumes:
   pg_data:
